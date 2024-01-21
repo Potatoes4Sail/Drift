@@ -1,16 +1,14 @@
-#include <Arduino.h>
+#include <avr/io.h>
+#include <util/delay.h>
 
-void setup() {
-    // write your initialization code here
-    pinMode(LED_BUILTIN, OUTPUT); // Uses built in variable to set LED
-}
+int main(void) {
+    DDRB |= _BV(DDB5); // Set LED as an output
 
-void loop() {
-// write your code here
-    static const int timeMs = 1200; //  Allow for easily verifying you can compile & upload code
-
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(timeMs);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(timeMs);
+    while (1) {
+        PORTB |= _BV(PORTB5);
+        _delay_ms(10);
+        PORTB &= ~_BV(PORTB5);
+        _delay_ms(100);
+    }
+    return 1;
 }
