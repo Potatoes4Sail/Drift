@@ -6,6 +6,5 @@ void setup() {
 void loop() {
 // write your code here
 // test,should fail
-
     printf("Hi");
 }
