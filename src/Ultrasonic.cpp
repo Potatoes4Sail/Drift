@@ -24,9 +24,9 @@ int Ultrasonic::pollSensor() {
 }
 
 void Ultrasonic::triggerUltrasound() {
-    PORTB &= ~_BV(this->triggerPin); // Turns it off
+    this->triggerPinBank &= ~_BV(this->triggerPin); // Turns it off
     _delay_us(10);
-    PORTB |= _BV(this->triggerPin);
+    this->triggerPinBank |= _BV(this->triggerPin);
     _delay_us(10);
-    PORTB &= ~_BV(this->triggerPin);
+    this->triggerPinBank &= ~_BV(this->triggerPin);
 }

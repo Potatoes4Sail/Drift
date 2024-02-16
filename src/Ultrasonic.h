@@ -12,7 +12,9 @@ public:
     Ultrasonic(int triggerPinBank, int  triggerPinVar, int echoPinBank, int echoPin);
 
     int pollSensor();
-    void triggerUltrasound();
+
+private:
+    void triggerUltrasound(); // Actually sends pulse to Ultrasonic sensor,
 };
 
 
