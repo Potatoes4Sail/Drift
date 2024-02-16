@@ -5,15 +5,14 @@
 #ifndef DRIFT_ULTRASONIC_H
 #define DRIFT_ULTRASONIC_H
 
-#include <avr/io.h>
-
 class Ultrasonic {
 public:
     int triggerPin, triggerPinBank;
     int echoPin, echoPinBank;
-    Ultrasonic(int  triggerPin, int triggerPinBank, int echoPin, int echoPinBank);
+    Ultrasonic(int triggerPinBank, int  triggerPinVar, int echoPinBank, int echoPin);
 
     int pollSensor();
+    void triggerUltrasound();
 };
 
 

@@ -6,6 +6,9 @@
 
 int main(void) {
     Serial.begin(9600);
+    Ultrasonic sensor1(DDRB, DDB1, DDRB, DDB2);
+    sensor1.pollSensor();
+
 //    DDRB |= _BV(DDB5); // Set LED as an output
 //    DDRB |= _BV(DDB1); // Set trigger to output
 //    DDRB &= ~_BV(DDB2); // Set echo to input

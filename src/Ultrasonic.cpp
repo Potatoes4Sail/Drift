@@ -3,23 +3,30 @@
 //
 
 #include "Ultrasonic.h"
+#include <avr/io.h>
+#include <util/delay.h>
 
-Ultrasonic::Ultrasonic(int triggerPin, int triggerPinBank, int echoPin, int echoPinBank) {
+Ultrasonic::Ultrasonic(int triggerPinBankVar, int triggerPinVar, int echoPinBankVar, int echoPinVar) {
+    this->triggerPin = triggerPinVar;
+    this->triggerPinBank = triggerPinBankVar;
+    this->echoPin = echoPinVar;
+    this->echoPinBank = echoPinBankVar;
+
     triggerPinBank |= _BV(triggerPin); // Set trigger to output
     echoPinBank &= ~_BV(echoPin); // Set echo to input
 }
 
 int Ultrasonic::pollSensor() {
-    // Write code to actuall work.
+    //TODO: Write code that will function to time how long it takes to get response from sensor
+    this->triggerUltrasound();
+
     return -1;
 }
 
-void triggerUltrasound() {
-    //TODO: how do i do this right?
-    PORTB &= ~_BV(Ultrasonic::triggerPin); // Turns it off
-
+void Ultrasonic::triggerUltrasound() {
+    PORTB &= ~_BV(this->triggerPin); // Turns it off
     _delay_us(10);
-    PORTB |= _BV(triggerPin);
+    PORTB |= _BV(this->triggerPin);
     _delay_us(10);
-    PORTB &= ~_BV(triggerPin);
+    PORTB &= ~_BV(this->triggerPin);
 }
