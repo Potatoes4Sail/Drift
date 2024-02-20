@@ -6,8 +6,10 @@
 #include "helperFunctions.h"
 #include <avr/io.h>
 #include <util/delay.h>
-#include <Arduino.h>
 
+/// Ultrasonic Object - Object which is used with the HC-SR04 sensor
+/// \param triggerPinIN - digital pin number of trigger pin
+/// \param echoPinIN - digital pin number of echo pin
 Ultrasonic::Ultrasonic(uint8_t triggerPinIN, uint8_t echoPinIN) {
     this->triggerPin = triggerPinIN;
     this->echoPin = echoPinIN;
@@ -16,16 +18,17 @@ Ultrasonic::Ultrasonic(uint8_t triggerPinIN, uint8_t echoPinIN) {
     *portModeRegister(digitalPinToPort(echoPin)) &= ~digitalPinToBitMask(echoPin);      // Sets echo pin to output
 }
 
-
+/// pollSensor - Sends a pulse and times how long it takes for a response
+///
+/// \return [float] Distance in mm
 float Ultrasonic::pollSensor() {
-    //TODO: Write code that will function to time how long it takes to get response from sensor
     triggerUltrasound();
 
     stopInterrupts();
-    float duration = measurePulse();
+    float duration = measurePulse(echoPin, HIGH, 23529);
     startInterrupts();
-
-    return (duration/ 5.88235f);
+    sensorDistance = (duration/ 5.88235f);
+    return sensorDistance;
 }
 
 void Ultrasonic::triggerUltrasound() {
@@ -37,23 +40,4 @@ void Ultrasonic::triggerUltrasound() {
     *portOutputRegister(digitalPinToPort(triggerPin)) &= ~digitalPinToBitMask(triggerPin);  // Turns off pin again
 }
 
-int Ultrasonic::measurePulse() {
-    // cache the port and bit of the pin in order to speed up the
-    // pulse width measuring loop and achieve finer resolution.  calling
-    // digitalRead() instead yields much coarser resolution.
-    uint8_t bit = digitalPinToBitMask(echoPin);
-    uint8_t port = digitalPinToPort(echoPin);
-
-    uint8_t stateMask = (true ? bit : 0);
-
-    // convert the timeout from microseconds to a number of times through
-    // the initial loop; it takes approximately 16 clock cycles per iteration
-    unsigned long maxloops = microsecondsToClockCycles(23529.4) / 16.0;
-    unsigned long width = countPulse(portInputRegister(port), bit, stateMask, maxloops);
-
-    // prevent clockCyclesToMicroseconds to return bogus values if countPulseASM timed out
-    if (width)
-        return clockCyclesToMicroseconds(width * 16 + 16);
-    else
-        return 0;
-}
+Ultrasonic::~Ultrasonic() = default;

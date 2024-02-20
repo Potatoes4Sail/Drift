@@ -2,6 +2,7 @@
 // Created by Patrick on 2024-02-16.
 //
 
+
 #ifndef DRIFT_ULTRASONIC_H
 #define DRIFT_ULTRASONIC_H
 
@@ -12,16 +13,14 @@
 class Ultrasonic {
 public:
     uint8_t triggerPin, echoPin;
-    // int triggerPin, triggerPinBank;
-    // int echoPin, echoPinBank;
-    Ultrasonic(int triggerPinBank, int  triggerPinVar, int echoPinBank, int echoPin);
-    Ultrasonic(uint8_t triggerPinIN, uint8_t echoPinIN);
 
+    Ultrasonic(uint8_t triggerPinIN, uint8_t echoPinIN);
+    virtual ~Ultrasonic();
     float pollSensor();
 
 private:
+    uint16_t sensorDistance;
     void triggerUltrasound(); // Actually sends pulse to Ultrasonic sensor,
-    int measurePulse();
 };
 
 
