@@ -5,16 +5,19 @@
 #ifndef DRIFT_ULTRASONIC_H
 #define DRIFT_ULTRASONIC_H
 
-#define UltrasonicSensor1_triggerPinBank DDRB
+// #define UltrasonicSensor1_triggerPinBank DDRB
+
+#include <stdint-gcc.h>
 
 class Ultrasonic {
 public:
-    int triggerPin, triggerPinBank;
-    int echoPin, echoPinBank;
+    uint8_t triggerPin, echoPin;
+    // int triggerPin, triggerPinBank;
+    // int echoPin, echoPinBank;
     Ultrasonic(int triggerPinBank, int  triggerPinVar, int echoPinBank, int echoPin);
-    Ultrasonic(int triggerPinIN, int echoPinIN);
+    Ultrasonic(uint8_t triggerPinIN, uint8_t echoPinIN);
 
-    int pollSensor();
+    float pollSensor();
 
 private:
     void triggerUltrasound(); // Actually sends pulse to Ultrasonic sensor,

@@ -7,59 +7,53 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <Arduino.h>
-#include <wiring_private.h>
 
-Ultrasonic::Ultrasonic(int triggerPinBankVar, int triggerPinVar, int echoPinBankVar, int echoPinVar) {
-    this->triggerPin = triggerPinVar;
-    this->triggerPinBank = triggerPinBankVar;
-    this->echoPin = echoPinVar;
-    this->echoPinBank = echoPinBankVar;
+Ultrasonic::Ultrasonic(uint8_t triggerPinIN, uint8_t echoPinIN) {
+    this->triggerPin = triggerPinIN;
+    this->echoPin = echoPinIN;
 
-    triggerPinBank |= _BV(triggerPin); // Set trigger to output
-    echoPinBank &= ~_BV(echoPin); // Set echo to input
+    *portModeRegister(digitalPinToPort(triggerPin)) |= digitalPinToBitMask(triggerPin); // Sets trigger pin to input
+    *portModeRegister(digitalPinToPort(echoPin)) &= ~digitalPinToBitMask(echoPin);      // Sets echo pin to output
 }
 
 
-Ultrasonic::Ultrasonic(int triggerPinIN, int echoPinIN) {
-//TODO: Verify that this method works for setting variables. If so, it will be more maintainable:
-//  It does use pgmspace.h to work, but it likely a worthwhile tradeoff for readability and ease of use.
-
-//    uint8_t timer = digitalPinToTimer(pin);
-//    uint8_t bit = digitalPinToBitMask(pin);
-//    uint8_t port = digitalPinToPort(pin);
-
-    this->triggerPin = digitalPinToBitMask(triggerPinIN);
-    this->triggerPinBank = digitalPinToPort(triggerPinIN);
-
-    this->echoPin = digitalPinToBitMask(echoPinIN);
-    this->echoPinBank = digitalPinToPort(echoPinIN);
-
-    triggerPinBank |= _BV(triggerPin); // Set trigger to output
-    echoPinBank &= ~_BV(echoPin); // Set echo to input
-}
-
-
-int Ultrasonic::pollSensor() {
+float Ultrasonic::pollSensor() {
     //TODO: Write code that will function to time how long it takes to get response from sensor
-    this->triggerUltrasound();
+    triggerUltrasound();
 
     stopInterrupts();
-    measurePulse();
+    float duration = measurePulse();
     startInterrupts();
-    return -1;
+
+    return (duration/ 5.88235f);
 }
 
 void Ultrasonic::triggerUltrasound() {
-    this->triggerPinBank &= ~_BV(this->triggerPin); // Turns it off
+    *portOutputRegister(digitalPinToPort(triggerPin)) &= ~digitalPinToBitMask(
+            triggerPin);  // Turns off pin if it was on before
     _delay_us(10);
-    this->triggerPinBank |= _BV(this->triggerPin);
+    *portOutputRegister(digitalPinToPort(triggerPin)) |= digitalPinToBitMask(triggerPin);  // Turns on pin for 10 us
     _delay_us(10);
-    this->triggerPinBank &= ~_BV(this->triggerPin);
+    *portOutputRegister(digitalPinToPort(triggerPin)) &= ~digitalPinToBitMask(triggerPin);  // Turns off pin again
 }
 
 int Ultrasonic::measurePulse() {
-    // pulseIn();
-    // Uses countPulseASM at low level;
-    this->echoPin;
-    return -1;
+    // cache the port and bit of the pin in order to speed up the
+    // pulse width measuring loop and achieve finer resolution.  calling
+    // digitalRead() instead yields much coarser resolution.
+    uint8_t bit = digitalPinToBitMask(echoPin);
+    uint8_t port = digitalPinToPort(echoPin);
+
+    uint8_t stateMask = (true ? bit : 0);
+
+    // convert the timeout from microseconds to a number of times through
+    // the initial loop; it takes approximately 16 clock cycles per iteration
+    unsigned long maxloops = microsecondsToClockCycles(23529.4) / 16.0;
+    unsigned long width = countPulse(portInputRegister(port), bit, stateMask, maxloops);
+
+    // prevent clockCyclesToMicroseconds to return bogus values if countPulseASM timed out
+    if (width)
+        return clockCyclesToMicroseconds(width * 16 + 16);
+    else
+        return 0;
 }
