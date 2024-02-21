@@ -2,11 +2,18 @@
 // Created by Patrick on 2024-02-21.
 //
 
+#include <avr/iom328p.h>
+
 #ifndef DRIFT_PINDEFINITION_H
 #define DRIFT_PINDEFINITION_H
 
-#define LEFT_MOTOR_PIN_PWM
-#define LEFT_MOTOR_PIN_FORWARD
-#define LEFT_MOTOR_PIN_REVERSE
+/*
+ * LEFT MOTOR DEFINITIONS
+ */
+#define LEFT_MOTOR_PIN_PWM      9
+#define LEFT_MOTOR_PIN_FORWARD  8
+#define LEFT_MOTOR_PIN_REVERSE  7
+
+#define LEFT_MOTOR_PWM_REGISTER OCR0A // Based on LEFT_MOTOR_PIN_PWM.
 
 #endif //DRIFT_PINDEFINITION_H
