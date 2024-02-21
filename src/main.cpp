@@ -4,14 +4,23 @@
 #include <Arduino.h>
 #include "helperFunctions.h"
 #include "PWM.h"
+#include "L298Driver.h"
 
 
 int main() {
 //    PWMTest();
 //    Serial.begin(9600);
+
+    /*
+     * Ultrasonic sensors are currently not usable with motor drivers as they use the same pins (just need to change numbers)
+     */
     Ultrasonic sensor1(9, 10);
     Ultrasonic sensor2(9, 11);
     Ultrasonic sensor3(9, 12);
+    //*/
+
+    L298Driver leftSide(13, 12, 11, OCR0A);
+    L298Driver rightSide(14, 15, 16, OCR0B);
 
     uint16_t dist1, dist2, dist3;
 

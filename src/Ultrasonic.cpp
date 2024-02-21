@@ -32,8 +32,8 @@ float Ultrasonic::pollSensor() {
 }
 
 void Ultrasonic::triggerUltrasound() {
-    *portOutputRegister(digitalPinToPort(triggerPin)) &= ~digitalPinToBitMask(
-            triggerPin);  // Turns off pin if it was on before
+    // Turns off pin if it was on before
+    *portOutputRegister(digitalPinToPort(triggerPin)) &= ~digitalPinToBitMask(triggerPin);
     _delay_us(10);
     *portOutputRegister(digitalPinToPort(triggerPin)) |= digitalPinToBitMask(triggerPin);  // Turns on pin for 10 us
     _delay_us(10);
