@@ -16,8 +16,8 @@ Ultrasonic::Ultrasonic(uint8_t triggerPinIN, uint8_t echoPinIN) {
 
     this->sensorDistance = -1;
 
-    *portModeRegister(digitalPinToPort(triggerPin)) |= digitalPinToBitMask(triggerPin); // Sets trigger pin to input
-    *portModeRegister(digitalPinToPort(echoPin)) &= ~digitalPinToBitMask(echoPin);      // Sets echo pin to output
+    *portModeRegister(digitalPinToPort(triggerPin)) |= digitalPinToBitMask(triggerPin); // Sets trigger pin to output
+    *portModeRegister(digitalPinToPort(echoPin)) &= ~digitalPinToBitMask(echoPin);      // Sets echo pin to input
 }
 
 /// pollSensor - Sends a pulse and times how long it takes for a response

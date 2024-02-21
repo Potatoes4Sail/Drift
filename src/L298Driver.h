@@ -6,11 +6,11 @@
 #define DRIFT_L298DRIVER_H
 #include <avr/io.h>
 #include "helperFunctions.h"
-
+#include "pinDefinition.h"
 
 class L298Driver {
 public:
-    L298Driver(uint8_t pwmPin,uint8_t forwardPin,uint8_t reversePin, uint8_t PWMRegister, uint8_t deadband = 10);
+    L298Driver(uint8_t pwmPin,uint8_t forwardPin,uint8_t reversePin, uint8_t deadband = 10);
 
     int setSpeed(int8_t speedVar);
     int setBrake(uint8_t breakAmountVar);
@@ -29,9 +29,6 @@ private:
 
     /// Minimum throttle to have an effect.
     uint8_t deadband;
-
-    /// Stores which register the object should use
-    uint8_t PWMRegister;
 };
 
 

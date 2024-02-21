@@ -3,10 +3,11 @@
 //
 
 #include "PWM.h"
-void PWMTest(){
+
+void PWMTest() {
     DDRD |= _BV(DDD6); // Sets PD6 to output
 
-    OCR0A = (uint8_t)1; //(50 * 2.55)
+    OCR0A = (uint8_t) 1; //(50 * 2.55)
     // set PWM for 50% duty cycle
 
     TCCR0A |= (1 << COM0A1);
