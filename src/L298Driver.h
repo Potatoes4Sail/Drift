@@ -10,7 +10,7 @@
 
 class L298Driver {
 public:
-    L298Driver(uint8_t pwmPin,uint8_t forwardPin,uint8_t reversePin, uint8_t deadband = 10);
+    L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reversePinVal, uint8_t deadbandVal = 10);
 
     int setSpeed(int8_t speedVar);
     int setBrake(uint8_t breakAmountVar);

@@ -13,18 +13,15 @@
 /// \param forwardPin - Any GPIO for controlling forward pin
 /// \param reversePin - Any GPIO for controlling reverse pin
 /// \param deadband - Amount #/255 below which no response will occur from motor. Used as there is likely minimum pwm for anything to occur
-L298Driver::L298Driver(uint8_t pwmPin, uint8_t forwardPin, uint8_t reversePin, uint8_t deadband) {
+L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reversePinVal, uint8_t deadbandVal) {
 
     // Sets variables of the class.
 
-    this->pwmPin = pwmPin;
-    this->forwardPin = forwardPin;
-    this->reversePin = reversePin;
-    this->deadband = deadband;
+    this->pwmPin = pwmPinVal;
+    this->forwardPin = forwardPinVal;
+    this->reversePin = reversePinVal;
+    this->deadband = deadbandVal;
 
-
-    // TODO: Replace this with a bool value to set which register is used, or pull from a "pinDefinition.h (later is probably better)
-    
     // ========================================
     //
     //              Configuring PWM
@@ -64,7 +61,7 @@ int L298Driver::setSpeed(int8_t speedVar) {
 
     if (speed > deadband) { // Set throttle to positive
         // TODO: Would ideally set both pins at the same time to avoid different states,
-        //  but this will impose significant restrictions on which pins can be used
+        //  but this will impose significant restrictions on which pins can be used, and has a minor improvement
         *portOutputRegister(digitalPinToPort(reversePin)) &= ~digitalPinToBitMask(reversePin); // Set reverse pin to low
         *portOutputRegister(digitalPinToPort(forwardPin)) |= digitalPinToBitMask(forwardPin); // Set forward pin to high
 
