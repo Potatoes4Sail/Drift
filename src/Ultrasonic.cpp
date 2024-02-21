@@ -14,6 +14,8 @@ Ultrasonic::Ultrasonic(uint8_t triggerPinIN, uint8_t echoPinIN) {
     this->triggerPin = triggerPinIN;
     this->echoPin = echoPinIN;
 
+    this->sensorDistance = -1;
+
     *portModeRegister(digitalPinToPort(triggerPin)) |= digitalPinToBitMask(triggerPin); // Sets trigger pin to input
     *portModeRegister(digitalPinToPort(echoPin)) &= ~digitalPinToBitMask(echoPin);      // Sets echo pin to output
 }

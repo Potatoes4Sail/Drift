@@ -21,6 +21,9 @@ L298Driver::L298Driver(uint8_t pwmPin, uint8_t forwardPin, uint8_t reversePin, u
     this->reversePin = reversePin;
     this->deadband = deadband;
 
+
+    // TODO: Replace this with a bool value to set which register is used, or pull from a "pinDefinition.h (later is probably better)
+    
     if ((PWMRegister == OCR0A) || (PWMRegister == OCR0B)) {
         this->PWMRegister = PWMRegister;
     } else {
@@ -61,6 +64,9 @@ L298Driver::L298Driver(uint8_t pwmPin, uint8_t forwardPin, uint8_t reversePin, u
     *portOutputRegister(digitalPinToPort(reversePin)) &= ~digitalPinToBitMask(reversePin);
 }
 
+/// Function with sets the speed of the motor
+/// \param speedVar - int8_t value, must be between -
+/// \return
 int L298Driver::setSpeed(int8_t speedVar) {
     this->speed = speedVar;
 

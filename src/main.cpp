@@ -11,6 +11,9 @@ int main() {
 //    PWMTest();
 //    Serial.begin(9600);
 
+    uint8_t PWMRegister;
+    PWMRegister = OCR0A;
+
     /*
      * Ultrasonic sensors are currently not usable with motor drivers as they use the same pins (just need to change numbers)
      */

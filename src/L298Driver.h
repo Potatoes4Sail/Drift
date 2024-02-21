@@ -15,14 +15,23 @@ public:
     int setSpeed(int8_t speedVar);
     int setBrake(uint8_t breakAmountVar);
 private:
-    int8_t speed; /// Speed of motor, ranging from -128 to 127
-    uint8_t brakeAmount; /// Amount 0-255 to apply break
+    /// Speed of motor, ranging from -128 to 127
+    int8_t speed;
 
-    uint8_t pwmPin; /// Pin used for PWM. Here it will be constrained to two specific pins due to which timer bank is uesed
-    uint8_t forwardPin, reversePin; /// Pin assignment for GPIO of forward and reverse pins
+    /// Amount 0-255 to apply break
+    uint8_t brakeAmount;
 
-    uint8_t deadband; /// Minimum throttle to have an effect.
-    uint8_t PWMRegister; /// Stores which register the object should use
+    /// Pin used for PWM. Here it will be constrained to two specific pins due to which timer bank is uesed
+    uint8_t pwmPin;
+
+    /// Pin assignment for GPIO of forward and reverse pins
+    uint8_t forwardPin, reversePin;
+
+    /// Minimum throttle to have an effect.
+    uint8_t deadband;
+
+    /// Stores which register the object should use
+    uint8_t PWMRegister;
 };
 
 

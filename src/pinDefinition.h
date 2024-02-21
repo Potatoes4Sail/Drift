@@ -1,0 +1,12 @@
+//
+// Created by Patrick on 2024-02-21.
+//
+
+#ifndef DRIFT_PINDEFINITION_H
+#define DRIFT_PINDEFINITION_H
+
+#define LEFT_MOTOR_PIN_PWM
+#define LEFT_MOTOR_PIN_FORWARD
+#define LEFT_MOTOR_PIN_REVERSE
+
+#endif //DRIFT_PINDEFINITION_H
