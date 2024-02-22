@@ -10,7 +10,6 @@
 ultrasonicDriver::ultrasonicDriver() {
     triggerPin = -1;
     echoPin = -1;
-    sensorDistance = -1;
 }
 
 
@@ -27,15 +26,13 @@ ultrasonicDriver::ultrasonicDriver(uint8_t triggerPinIN, uint8_t echoPinIN) {
     *portModeRegister(digitalPinToPort(echoPin)) &= ~digitalPinToBitMask(echoPin);      // Sets echo pin to output
 }
 
-/// pollSensor - Sends a pulse and times how long it takes for a response
-///
-/// \return [float] Distance in mm
+/// pollSensor - Sends a pulse from the sensor
 void ultrasonicDriver::pollSensor() {
     if (!initialized) return;
     triggerUltrasound();
 }
 
-void ultrasonicDriver::triggerUltrasound() {
+void ultrasonicDriver::triggerUltrasound() const {
     // Turns off pin if it was on before
     *portOutputRegister(digitalPinToPort(triggerPin)) &= ~digitalPinToBitMask(triggerPin);
     _delay_us(10);
