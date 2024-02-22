@@ -17,7 +17,7 @@ public:
 
     void pollNextSensor();
     uint16_t readSensor(uint8_t sensorNumber);
-    void interruptTrigger(uint8_t pinMask, uint32_t time) volatile;
+    volatile void interruptTrigger(uint8_t pinMask, uint32_t time);
 public: // TODO: Remake all of these private after fixing bugs
     ultrasonicDriver *sensorArray;
     uint8_t triggerPin;
@@ -29,6 +29,7 @@ public:
     /// Status of timing, false when not timing, true when timing
     volatile bool timing;
     volatile uint32_t startTime, endTime;
+
 };
 
 #endif //DRIFT_ULTRASONIC_H

@@ -64,14 +64,16 @@ uint16_t Ultrasonic::readSensor(uint8_t sensorNumber) {
     return -1;
 }
 
-void Ultrasonic::interruptTrigger(uint8_t pinMask, uint32_t time) volatile {
+//#define checkPinMask(pin) (pinMask == _BV(ULTRASONIC_SENSOR##pin_INT) && currentPolledSensor == pin)
+// Unused, but can be used here to simplify adding more functions.
+// checkPinMask(0) || checkPinMask(1) || checkPinMask(2) ;
+
+void volatile Ultrasonic::interruptTrigger(uint8_t pinMask, uint32_t time)  {
     if ((pinMask == _BV(ULTRASONIC_SENSOR0_INT) && currentPolledSensor == 0) ||
         (pinMask == _BV(ULTRASONIC_SENSOR1_INT) && currentPolledSensor == 1) ||
         (pinMask == _BV(ULTRASONIC_SENSOR2_INT) && currentPolledSensor == 2)) {
-        Serial.println((String) + "CPS: " + currentPolledSensor);
         if (!timing) {
             startTime = time;
-            endTime = time;
             timing = true;
         } else {
             endTime = time;
