@@ -27,7 +27,9 @@ float Ultrasonic::pollSensor() {
     stopInterrupts();
     float duration = measurePulse(echoPin, HIGH, 23529);
     startInterrupts();
-    sensorDistance = (duration/ 5.88235f);
+    if (duration != 0){
+        sensorDistance = (duration/ 5.88235f);
+    }
     return sensorDistance;
 }
 
