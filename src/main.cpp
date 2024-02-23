@@ -14,35 +14,25 @@ ISR(TIMER1_OVF_vect);
 void interruptTesting();
 
 ISR(ULTRASONIC_SENSORS_INT_vect) {
-    // TODO: Troubleshoot this function not working reliably
-    volatile uint8_t newVal =
-            PINB & (_BV(ULTRASONIC_SENSOR0_INT) | _BV(ULTRASONIC_SENSOR1_INT) | _BV(ULTRASONIC_SENSOR2_INT));
+//    PORTB ^= (1 << PORTB5); // Use to debug to validate that the interrupt is triggering correctly.
+// TODO: Use toggling of this port to measure total duration.
+    // Bitwise and between port output and mask of interrupt pins.
+    volatile uint8_t newVal = PINB & ULTRASONIC_SENSOR_INTERRUPT_MASK;
     ultrasonicSensors.interruptTrigger(OLD_INT_BANK ^ newVal, micros());
     OLD_INT_BANK = newVal;
-    PORTB ^= (1 << PORTB5); // Use to debug to validate that the interrupt is triggering correctly
-}
-
-void POC_ultrasonic_interrupts() {
-    // Sets pin mask for all ultrasonic sensor echo pins
-    ULTRASONIC_SENSORS_PIN_MASK |= (_BV(ULTRASONIC_SENSOR0_INT) | _BV(ULTRASONIC_SENSOR1_INT) |
-                                    _BV(ULTRASONIC_SENSOR2_INT));
-
-    // Enable global interrupts:
-    sei();
 }
 
 int main() {
+    // Either use the arduino init function, or the custom made startup function;
+    // This will set up the registers to enable the timer for millis & micros
 #if INCLUDECUSTOM
     startupFunction();
 #else
     init();
 #endif
 
-    POC_ultrasonic_interrupts();
-
     Serial.begin(9600);
-
-    interruptTesting();
+    interruptTesting(); // Function used for testing
 
     Serial.println("Should never be here");
     while (true) {
@@ -72,21 +62,21 @@ void interruptTesting() {
     unsigned long pastRanTime = 0;
     unsigned long pastRanTime2 = 0;
     uint16_t dist0, dist1, dist2;
-    Serial.println("entering loop");
+
     while (true) {
-        if ((millis() - pastRanTime) > 250) {
+        // Checking every 100 ms, and poll sensor. This can likely be reduce to 60-80 ms/poll.
+        if ((millis() - pastRanTime) > 100) {
             ultrasonicSensors.pollNextSensor();
             pastRanTime = millis();
         }
 
-        if ((millis() - pastRanTime2) > 1000) {
+        // Every half second output the distances to the console.
+        if ((millis() - pastRanTime2) > 500) {
             pastRanTime2 = millis();
-            dist0 = ultrasonicSensors.readSensor(0);
-            dist1 = ultrasonicSensors.readSensor(1);
-            dist2 = ultrasonicSensors.readSensor(2);
+            dist0 = ultrasonicSensors.readSensorData(0);
+            dist1 = ultrasonicSensors.readSensorData(1);
+            dist2 = ultrasonicSensors.readSensorData(2);
             Serial.print((String) "Sensor0: " + dist0 + "\tSensor1: " + dist1 + "\tSensor2: " + dist2 + "!\n");
-//            Serial.print((String) "Sensor start: " + ultrasonicSensors.startTime + "\t Sensor end: " + ultrasonicSensors.endTime + "\t timing: " + ultrasonicSensors.timing + "\n");
-//            Serial.println(PORTB, BIN);
         }
     }
 }

@@ -16,7 +16,7 @@ public:
 
 
     void pollNextSensor();
-    uint16_t readSensor(uint8_t sensorNumber);
+    uint16_t readSensorData(uint8_t sensorNumber) const;
     volatile void interruptTrigger(uint8_t pinMask, uint32_t time);
 public: // TODO: Remake all of these private after fixing bugs
     ultrasonicDriver *sensorArray;
