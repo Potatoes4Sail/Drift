@@ -8,10 +8,10 @@
 #include "helperFunctions.h"
 
 ultrasonicDriver::ultrasonicDriver() {
-    triggerPin = -1;
-    echoPin = -1;
+    this->initialized = false;
+    this->triggerPin = -1;
+    this->echoPin = -1;
 }
-
 
 /// ultrasonicDriver Object - Object which is used with the HC-SR04 sensor
 /// \param triggerPinIN - digital pin number of trigger pin

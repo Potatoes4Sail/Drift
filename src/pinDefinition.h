@@ -1,14 +1,12 @@
 //
 // Created by Patrick on 2024-02-21.
 //
-
 #pragma once
-#include "helperFunctions.h"
 
-// #define INCLUDECUSTOM
 #ifndef DRIFT_PINDEFINITION_H
 #define DRIFT_PINDEFINITION_H
 
+#include "helperFunctions.h"
 /*
  *  MOTOR DEFINITIONS
  */

@@ -1,47 +1,48 @@
+#ifdef INCLUDECUSTOM
+#define millis countMillis
+#define micros countMicros
+#else
 #include <Arduino.h>
+#endif
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include "ultrasonic.h"
-#include "helperFunctions.h"
 #include "pinDefinition.h"
+#include "helperFunctions.h"
 
+// Global variables
 Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
                                           (uint8_t[]) {ULTRASONIC_SENSOR0_ECHO_PIN, ULTRASONIC_SENSOR1_ECHO_PIN,
                                                        ULTRASONIC_SENSOR2_ECHO_PIN}, 3);
 volatile uint8_t OLD_INT_BANK = 0b00000000;
+
+// Interrupts
 ISR(TIMER1_OVF_vect);
 
-void interruptTesting();
+ISR(ULTRASONIC_SENSORS_INT_vect);
 
-ISR(ULTRASONIC_SENSORS_INT_vect) {
-//    PORTB ^= (1 << PORTB5); // Use to debug to validate that the interrupt is triggering correctly.
-// TODO: Use toggling of this port to measure total duration.
-    // Bitwise and between port output and mask of interrupt pins.
-    volatile uint8_t newVal = PINB & ULTRASONIC_SENSOR_INTERRUPT_MASK;
-    ultrasonicSensors.interruptTrigger(OLD_INT_BANK ^ newVal, micros());
-    OLD_INT_BANK = newVal;
-}
+void interruptTesting();
 
 int main() {
     // Either use the arduino init function, or the custom made startup function;
     // This will set up the registers to enable the timer for millis & micros
-#if INCLUDECUSTOM
+#ifdef INCLUDECUSTOM
     startupFunction();
 #else
     init();
 #endif
 
-    Serial.begin(9600);
+//    Serial.begin(9600);
     interruptTesting(); // Function used for testing
 
-    Serial.println("Should never be here");
+//    Serial.println("Should never be here");
+    // debug message if function used for testing interrupts failed to get called.
     while (true) {
-
         digitalPinWrite(13, HIGH);
         _delay_ms(100);
         digitalPinWrite(13, LOW);
         _delay_ms(100);
-
     }
     return 1;
 }
@@ -76,14 +77,23 @@ void interruptTesting() {
             dist0 = ultrasonicSensors.readSensorData(0);
             dist1 = ultrasonicSensors.readSensorData(1);
             dist2 = ultrasonicSensors.readSensorData(2);
-            Serial.print((String) "Sensor0: " + dist0 + "\tSensor1: " + dist1 + "\tSensor2: " + dist2 + "!\n");
+//            Serial.print((String) "Sensor0: " + dist0 + "\tSensor1: " + dist1 + "\tSensor2: " + dist2 + "!\n");
         }
     }
 }
 
+ISR(ULTRASONIC_SENSORS_INT_vect) {
+//    PORTB ^= (1 << PORTB5); // Use to debug to validate that the interrupt is triggering correctly.
+// TODO: Use toggling of this port to measure total duration.
+    // Bitwise and between port output and mask of interrupt pins.
+    // This is not strictly needed, in the future would need if to see which function to call.
+    volatile uint8_t newVal = PINB & ULTRASONIC_SENSOR_INTERRUPT_MASK;
+    ultrasonicSensors.interruptTrigger(OLD_INT_BANK ^ newVal, micros());
+    OLD_INT_BANK = newVal;
+}
+
 ISR(TIMER1_OVF_vect) {
-//    _delay_ms(100);
-//    PORTB ^= (1 << PORTB5);
+    //    PORTB ^= (1 << PORTB5);
 }
 
 

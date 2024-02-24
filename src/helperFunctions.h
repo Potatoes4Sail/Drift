@@ -2,7 +2,6 @@
 // Created by Patrick on 2024-02-20.
 //
 
-
 #ifndef DRIFT_HELPERFUNCTIONS_H
 #define DRIFT_HELPERFUNCTIONS_H
 
@@ -18,7 +17,7 @@
 
 /// Uses macros to include the default Arduino define statements, such as constant values, simple functions and port mapping
 #ifndef Arduino_h
-#define Arduino_h
+//#define Arduino_h
 
 #define HIGH 0x1
 #define LOW  0x0
