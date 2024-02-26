@@ -41,4 +41,16 @@ void ultrasonicDriver::triggerUltrasound() const {
     *portOutputRegister(digitalPinToPort(triggerPin)) &= ~digitalPinToBitMask(triggerPin);  // Turns off pin again
 }
 
+bool ultrasonicDriver::isInitialized() const {
+    return initialized;
+}
+
+uint8_t ultrasonicDriver::getTriggerPin() const {
+    return triggerPin;
+}
+
+uint8_t ultrasonicDriver::getEchoPin() const {
+    return echoPin;
+}
+
 ultrasonicDriver::~ultrasonicDriver() = default;

@@ -86,7 +86,7 @@ ISR(TIMER0_OVF_vect) {
     timer0_overflow_count++;
 }
 
-unsigned long countMillis() {
+unsigned long millis() {
     unsigned long m;
     uint8_t oldSREG = SREG;
 
@@ -99,7 +99,7 @@ unsigned long countMillis() {
     return m;
 }
 
-unsigned long countMicros() {
+unsigned long micros() {
     unsigned long m;
     uint8_t oldSREG = SREG, t;
 
@@ -131,5 +131,26 @@ void startupFunction(){
 
     // Enable interrupt mask
     TIMSK0 |= TOIE0;
+
+    // Setup timers for PWM
+    TCCR1B = 0;
+    // prescaler to 64
+    bitSet(TCCR1B, CS11);
+    bitSet(TCCR1B, CS10);
+    bitSet(TCCR1A, WGM10);
+    // put timer 1 in 8-bit phase correct pwm mode
+
+    bitSet(TCCR1A, WGM10);
+// timer 2
+    bitSet(TCCR2B, CS22);
+    bitSet(TCCR2A, WGM20);
+
+    bitSet(ADCSRA, ADPS2);
+    bitSet(ADCSRA, ADPS1);
+    bitSet(ADCSRA, ADPS0);
+    bitSet(ADCSRA, ADEN);
+
+    UCSR0B = 0;
+
 }
 #endif

@@ -28,8 +28,9 @@ Ultrasonic::Ultrasonic(uint8_t trig, uint8_t echoPins[], uint8_t n) {
     PCICR |= _BV(PCIE0);
 
     // Enable interrupts:
-    // Sets pin mask for all ultrasonic sensor echo pins
-    ULTRASONIC_SENSORS_PIN_MASK |= ULTRASONIC_SENSOR_INTERRUPT_MASK;
+    // Sets pin mask for all ultrasonic sensor echo pins.
+    // Disable pin interrupts for everything. Set when called
+    //    ULTRASONIC_SENSORS_PIN_MASK |= ULTRASONIC_SENSOR_INTERRUPT_MASK;
 
     // Enable global interrupts:
     sei();
@@ -54,6 +55,9 @@ void Ultrasonic::pollNextSensor() {
     if (!timing) {
         uint16_t deltaTime = endTime - startTime; // Calculate the difference in time
         distances[currentPolledSensor] = (deltaTime / 5.88235f);
+        // Time in us (E-6)/5.88235 gives distance in mm (E-3)
+        // Time (ms) / 5.88235 gives m
+        // Time (s) / 5882 gives m
     } else { // Failed to return a proper value
 //        Serial.println((String) "Function was still timing when this happened;\t startTime = " + startTime + "\t endTime = " + endTime + "\n");
         startTime = 0;
@@ -63,6 +67,8 @@ void Ultrasonic::pollNextSensor() {
     }
 
     if (++currentPolledSensor >= n) currentPolledSensor = 0;
+
+    ULTRASONIC_SENSORS_PIN_MASK = _BV(currentPolledSensor);
     sensorArray[currentPolledSensor].pollSensor();
 }
 
@@ -77,6 +83,8 @@ uint16_t Ultrasonic::readSensorData(uint8_t sensorNumber) const {
     return -1;
 }
 
+
+#define ULTRASONIC_MASK_MACRO(PIN) ((pinMask & _BV(ULTRASONIC_SENSOR##PIN##_INT)) && (currentPolledSensor == PIN))
 void volatile Ultrasonic::interruptTrigger(uint8_t pinMask, uint32_t time) {
 //    Serial.print((String) "currentPolledSensor = " + currentPolledSensor);
 //    Serial.print("\t 0 = ");
@@ -93,13 +101,15 @@ void volatile Ultrasonic::interruptTrigger(uint8_t pinMask, uint32_t time) {
 //    Serial.print((pinMask & _BV(ULTRASONIC_SENSOR2_INT)) && (currentPolledSensor == 2),BIN);
 //    Serial.println();
 
-
+// 4.25 with big if
+// 4.38 with short one
 //    if (((pinMask & _BV(ULTRASONIC_SENSOR0_INT)) && (currentPolledSensor == 0)) ||
 //        ((pinMask & _BV(ULTRASONIC_SENSOR1_INT)) && (currentPolledSensor == 1)) ||
 //        ((pinMask & _BV(ULTRASONIC_SENSOR2_INT)) && (currentPolledSensor == 2))) {
 //        Serial.print((String) "currentPolledSensor = " + currentPolledSensor + "\n");
     // compares the pin passed by the interrupt function with bit shifted via number of sensors
-    if (pinMask & _BV(currentPolledSensor)) {
+//    if (pinMask & _BV(currentPolledSensor)) {
+    if (ULTRASONIC_MASK_MACRO(0) || ULTRASONIC_MASK_MACRO(1) || ULTRASONIC_MASK_MACRO(2)) {
         if (!timing) {
             startTime = time;
             timing = true;

@@ -16,7 +16,7 @@
 #define TGL_BIT(PORT, BIT) PORT ^= _BV(BIT);
 
 /// Uses macros to include the default Arduino define statements, such as constant values, simple functions and port mapping
-#ifndef Arduino_h
+#ifdef INCLUDECUSTOM
 //#define Arduino_h
 
 #define HIGH 0x1
@@ -83,7 +83,9 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 #define portOutputRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_output_PGM + (P))) )
 #define portInputRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_input_PGM + (P))) )
 #define portModeRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_mode_PGM + (P))) )
+#else
 
+#include "Arduino.h"
 #endif
 
 //TODO: Troubleshoot why this doesn't seem to be working properly.
@@ -109,8 +111,8 @@ uint16_t measurePulse(uint8_t pin, uint8_t pinState, unsigned long timeout = 100
  * TIMING FUNCTIONS USED BY ARDUINO. CAN REPLACE WITH CUSTOM ONES LATER.
  */
 #ifdef INCLUDECUSTOM
-unsigned long countMillis();
-unsigned long countMicros();
+unsigned long millis();
+unsigned long micros();
 void startupFunction();
 
 // the prescaler is set so that timer0 ticks every 64 clock cycles, and the

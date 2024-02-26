@@ -1,6 +1,8 @@
+
+
 #ifdef INCLUDECUSTOM
-#define millis countMillis
-#define micros countMicros
+//#define millis() countMillis()
+//#define micros() countMicros()
 #else
 #include <Arduino.h>
 #endif
@@ -12,13 +14,14 @@
 #include "helperFunctions.h"
 
 // Global variables
+//Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,(uint8_t[]) {ULTRASONIC_SENSOR0_ECHO_PIN, ULTRASONIC_SENSOR1_ECHO_PIN,ULTRASONIC_SENSOR2_ECHO_PIN}, 3);
 Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
                                           (uint8_t[]) {ULTRASONIC_SENSOR0_ECHO_PIN, ULTRASONIC_SENSOR1_ECHO_PIN,
-                                                       ULTRASONIC_SENSOR2_ECHO_PIN}, 3);
+                                                       ULTRASONIC_SENSOR2_ECHO_PIN}, 1);
 volatile uint8_t OLD_INT_BANK = 0b00000000;
 
 // Interrupts
-ISR(TIMER1_OVF_vect);
+//ISR(TIMER1_OVF_vect);
 
 ISR(ULTRASONIC_SENSORS_INT_vect);
 
@@ -36,6 +39,7 @@ int main() {
 //    Serial.begin(9600);
     interruptTesting(); // Function used for testing
 
+
 //    Serial.println("Should never be here");
     // debug message if function used for testing interrupts failed to get called.
     while (true) {
@@ -49,7 +53,6 @@ int main() {
 
 //*
 void interruptTesting() {
-
     DDRB |= _BV(DDB5); // Set builtin LED to output
 
     // Timer interrupt stuff
@@ -82,19 +85,34 @@ void interruptTesting() {
     }
 }
 
+volatile uint16_t time = 0;
+volatile bool timerSet = false;
+
+// 4.44 us to .188 us
 ISR(ULTRASONIC_SENSORS_INT_vect) {
-//    PORTB ^= (1 << PORTB5); // Use to debug to validate that the interrupt is triggering correctly.
+    PORTB ^= (1 << PORTB5); // Use to debug to validate that the interrupt is triggering correctly.
+//
+    if (!timerSet) {
+        time = micros();
+        timerSet = true;
+    } else {
+        time -= micros();
+        timerSet = false;
+    }
+
 // TODO: Use toggling of this port to measure total duration.
     // Bitwise and between port output and mask of interrupt pins.
     // This is not strictly needed, in the future would need if to see which function to call.
-    volatile uint8_t newVal = PINB & ULTRASONIC_SENSOR_INTERRUPT_MASK;
-    ultrasonicSensors.interruptTrigger(OLD_INT_BANK ^ newVal, micros());
-    OLD_INT_BANK = newVal;
+//    newVal = PINB; // & ULTRASONIC_SENSOR_INTERRUPT_MASK;
+    // Removal of 2nd part of statement changes time from 4.76 us to 4.66 us. (.1 us faster)
+//    ultrasonicSensors.interruptTrigger(OLD_INT_BANK ^ PINB, micros());
+//    OLD_INT_BANK = PINB;
+    PORTB ^= (1 << PORTB5); // Use to debug to validate that the interrupt is triggering correctly.
 }
 
-ISR(TIMER1_OVF_vect) {
-    //    PORTB ^= (1 << PORTB5);
-}
+//ISR(TIMER1_OVF_vect) {
+//    //    PORTB ^= (1 << PORTB5);
+//}
 
 
 //*/

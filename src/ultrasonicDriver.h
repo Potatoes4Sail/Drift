@@ -17,6 +17,14 @@ public:
 private:
     bool initialized = false;
     uint8_t triggerPin, echoPin;
+public:
+    bool isInitialized() const;
+
+    uint8_t getTriggerPin() const;
+
+    uint8_t getEchoPin() const;
+
+private:
     void triggerUltrasound() const; // Actually sends pulse to ultrasonicDriver sensor,
 };
 
