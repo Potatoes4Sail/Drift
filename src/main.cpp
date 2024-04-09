@@ -8,32 +8,55 @@
 #include "pinDefinition.h"
 
 
+/*
+int main(void)
+{
+    DDRD |= (1 << DDD3);
+    DDRB |= (1 << DDB3);
+    // PD6 is now an output
+
+    TCCR2A |= _BV(COM2A1);
+    TCCR2A |= _BV(COM2B1);
+
+    TCCR2A |= _BV(WGM21) | _BV(WGM20);
+//    TCCR2A |= _BV(WGM20);
+
+    TCCR2B |= 0b001;
+    OCR2A = 180;
+    OCR2B = 10;
+
+    while (1);
+    {
+        // we have a working Fast PWM
+    }
+    return 1;
+} //*/
 
 int main() {
-    Serial.begin(9600);
 
-    /*
-     * Ultrasonic sensors are currently not usable with motor drivers as they use the same pins (just need to change numbers)
-     */
-    Ultrasonic sensor1(9, 10);
-    Ultrasonic sensor2(9, 11);
-    Ultrasonic sensor3(9, 12);
-    //*/
+    int8_t speed = 0;
+    L298Driver motor(MOTOR_PIN_PWM, MOTOR_PIN_FORWARD, MOTOR_PIN_REVERSE, 25);
+    motor.setSpeed(127);
+    _delay_ms(100);
+    motor.setSpeed(50);
 
-    L298Driver motor(MOTOR_PIN_PWM, MOTOR_PIN_FORWARD, MOTOR_PIN_REVERSE);
-    motor.setSpeed(100);
+//    while (true){
+//        speed++;
+//        if (speed>125) speed = 0;
+//        motor.setSpeed(speed);
+//        _delay_ms(50);
+//    }
 
-    uint16_t dist1, dist2, dist3;
-
-    while (true) {
-
-        dist1 = (uint16_t) sensor1.pollSensor(); //TODO: Switch back to cm and use a uint8 to store this? Would give 2.5 m and allow for slightly faster polling
-        dist2 = (uint16_t) sensor2.pollSensor();
-        dist3 = (uint16_t) sensor3.pollSensor();
-
-        Serial.print((String)"Sensor1: " + dist1 + "Sensor2: " + dist2 + "Sensor3: " + dist3 + "!\n");
-
-
-    }
+//    bool up = true;
+//    for(;;) {
+//        speed += up ? 1 : -1;
+//        if (speed == 0xff)
+//            up = false;
+//        else if (speed == 0x00)
+//            up = true;
+//
+//        _delay_ms(10);
+//        motor.setSpeed(speed);
+//    }
     return 1;
 }

@@ -4,7 +4,7 @@
 
 #include "L298Driver.h"
 
-#define MOTOR_PWM_REGISTER     OCR0A
+#define MOTOR_PWM_REGISTER     OCR2B
 
 /// Constructor for class which drives the L298 motor drivers.
 /// \n LIMITATIONS: Both pwm signals must come from the same timer, and TIMER0 is currently chosen.
@@ -30,13 +30,20 @@ L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reverse
 
     *portModeRegister(digitalPinToPort(pwmPin)) |= digitalPinToBitMask(pwmPin);      // Sets PWM pin to output
 
-    MOTOR_PWM_REGISTER = (uint8_t) 5; // Set PWM to 0
+    OCR2B = (uint8_t) 0; // Set PWM to 0
 
-    TCCR0A |= (1 << COM0A1); // Enables non-inverting mode
-    TCCR0A |= (1 << WGM01) | (1 << WGM00); // Enables fast PWM Mode
+    TCCR2A = 0;
 
-    TCCR0B |= 0b010; // Sets Prescaler to 8 (~8 kHz), will start PWM at 0 duty cycle.
-    // set prescaler to 8 and starts PWM
+    // TCCR2A |= (1 << COM2A1); // Enables PWM for timer side A
+    TCCR2A |= (1 << COM2B1); // Enables PWM for timer side B
+
+//    TCCR2A |= (1 << WGM21) | (1 << WGM20); // Enables fast PWM Mode
+    TCCR2A |= (1 << WGM20); // Enables fast PWM Mode
+
+    // TCCR2A |= (1 << WGM20); // Enables phase corrected PWM Mode.
+
+    TCCR2B = 0;
+    TCCR2B |= 0b101; // Sets Prescaler to 8 (~8 kHz), will start PWM at 0 duty cycle.
 
     // ========================================
     //
@@ -65,12 +72,22 @@ int L298Driver::setSpeed(int8_t speedVar) {
         *portOutputRegister(digitalPinToPort(reversePin)) &= ~digitalPinToBitMask(reversePin); // Set reverse pin to low
         *portOutputRegister(digitalPinToPort(forwardPin)) |= digitalPinToBitMask(forwardPin); // Set forward pin to high
 
-        MOTOR_PWM_REGISTER = (uint8_t) 2 * speed; // Set PWM duty cycle to speed variable * 2
+        if (MOTOR_PWM_REGISTER == 0) {
+            // Motor was previously off, set to full speed to start
+            MOTOR_PWM_REGISTER = (uint8_t) 255;
+        } else {
+            MOTOR_PWM_REGISTER = (uint8_t) 2 * speed; // Set PWM duty cycle to speed variable * 2
+        }
     } else if (speed < -deadband) { // Set throttle to negative
         *portOutputRegister(digitalPinToPort(reversePin)) |= digitalPinToBitMask(reversePin); // Set reverse pin to high
         *portOutputRegister(digitalPinToPort(forwardPin)) &= ~digitalPinToBitMask(forwardPin); // Set forward pin to low
 
-        MOTOR_PWM_REGISTER = (uint8_t) 2 * -speed; // Set PWM duty cycle to speed variable * 2
+        if (MOTOR_PWM_REGISTER == 0) {
+            // Motor was previously off, set to full speed to start
+            MOTOR_PWM_REGISTER = (uint8_t) 255;
+        } else {
+            MOTOR_PWM_REGISTER = (uint8_t) 2 * -speed; // Set PWM duty cycle to speed variable * 2
+        }
     } else { // Turn off throttle
         *portOutputRegister(digitalPinToPort(reversePin)) &= ~digitalPinToBitMask(reversePin); // Set reverse pin to low
         *portOutputRegister(digitalPinToPort(forwardPin)) &= ~digitalPinToBitMask(forwardPin); // Set forward pin to low
