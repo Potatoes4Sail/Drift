@@ -34,29 +34,24 @@ int main(void)
 
 int main() {
 
+    return 1;
+}
+
+void motorTestSetup(){
     int8_t speed = 0;
     L298Driver motor(MOTOR_PIN_PWM, MOTOR_PIN_FORWARD, MOTOR_PIN_REVERSE, 25);
     motor.setSpeed(127);
-    _delay_ms(100);
-    motor.setSpeed(50);
+//    _delay_ms(100);
+//    motor.setSpeed(100);
+    _delay_ms(1000);
+    motor.setSpeed(0);
+    _delay_ms(1000);
 
-//    while (true){
-//        speed++;
-//        if (speed>125) speed = 0;
-//        motor.setSpeed(speed);
-//        _delay_ms(50);
-//    }
+    motor.setSpeed(127);
+//    _delay_ms(100);
+//    motor.setSpeed(100);
+    _delay_ms(1000);
+    motor.setBrake(100);
+    _delay_ms(1000);
 
-//    bool up = true;
-//    for(;;) {
-//        speed += up ? 1 : -1;
-//        if (speed == 0xff)
-//            up = false;
-//        else if (speed == 0x00)
-//            up = true;
-//
-//        _delay_ms(10);
-//        motor.setSpeed(speed);
-//    }
-    return 1;
 }
