@@ -4,11 +4,7 @@
 
 #include "servoDriver.h"
 
-//servoDriver::servoDriver(uint8_t servoPin, uint8_t deadbandVal){
-servoDriver::servoDriver(uint8_t servoPin) {
-    this->servoPin = servoPin;
-//    this->deadBandAmount = deadbandVal;
-
+void servoDriverInit() {
     // Configure timer for interrupt based servo running.
 
     // For timer0;
@@ -34,13 +30,22 @@ servoDriver::servoDriver(uint8_t servoPin) {
 
 }
 
-int servoDriver::setAngle(uint8_t angleAmount) {
-    if ((angleAmount < 0) || (angleAmount > 180)) { // Invalid angle to attempt to set to, do nothing.
+int setAngleA(uint8_t angleAmount) {
+    if ((angleAmount < 0) || (angleAmount > 90)) { // Invalid angle to attempt to set to, do nothing.
         return -1;
     }
-    this->angle = angleAmount * ANGLE_CONV + PULSE_MIN;
 
-    OCR0A = (uint8_t) this->angle;
+    OCR0A = (uint8_t) angleAmount * ANGLE_CONV + PULSE_MIN;
+
+    return 0;
+}
+
+int setAngleB(uint8_t angleAmount) {
+    if ((angleAmount < 0) || (angleAmount > 90)) { // Invalid angle to attempt to set to, do nothing.
+        return -1;
+    }
+
+    OCR0B = (uint8_t) angleAmount * ANGLE_CONV + PULSE_MIN;
 
     return 0;
 }

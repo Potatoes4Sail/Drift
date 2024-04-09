@@ -8,14 +8,15 @@ TODO: Write an actual description
 
 | Pin# | D Pin | Bank | Use                    | Priority |
 |------|-------|------|------------------------|----------|
-| 1    | D3    | PD3  | Motor PWM 1            | Medium   |
-| 2    | D4    | PD4  | Motor Dir A            | Medium   |
-| 9    | D5    | PD5  | Motor Dir B            | Medium   |
-|      |       |      | Servo Control 1        |          |
-| 11   | D7    | PD7  | Ultrasonic Trigger Pin |          |
-| 12   | D8    | PB0  | Ultrasonic Echo Pin 0  |          |
-| 13   | D9    | PB1  | Ultrasonic Echo Pin 1  |          |
-| 14   | D10   | PB2  | Ultrasonic Echo Pin 2  |          |
+| 1    | D3    | PD3  | Motor PWM 1            | High     |
+| 2    | D4    | PD4  | Motor Forward Dir      | Low      |
+| 32   | D2    | PD2  | Motor Reverse Dir      | Low      |
+| 9    | D5    | PD5  | Servo Control 1        | High     |
+| 10   | D6    | PD6  | Servo Control 2        | High     |
+| 11   | D7    | PD7  | Ultrasonic Trigger Pin | Medium   |
+| 12   | D8    | PB0  | Ultrasonic Echo Pin 0  | Medium   |
+| 13   | D9    | PB1  | Ultrasonic Echo Pin 1  | Medium   |
+| 14   | D10   | PB2  | Ultrasonic Echo Pin 2  | Medium   |
 
 ## Communication Protocols
 
@@ -43,6 +44,11 @@ The H-Bridge requires one PWM pin per side, and both sides should be ran at the 
 timer. Timer2 was chosen.
 
 ### Servo
+
+Currently written in *wrong* way, and makes use of the timers themselves to simply update position of the servo. Can be
+improved if using interrupts instead.
+
+Is able to control 2 servos currently, on D5 & D6, without any interrupts to code.
 
 # Documentation
 
