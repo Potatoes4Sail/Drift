@@ -37,12 +37,22 @@ void UltrasonicDriver::triggerUltrasound() const {
 }
 
 int32_t UltrasonicDriver::readDistance() {
-    if (echoDetected) {
+    Serial.print(echoDetected);
+    if (echoDetected) {     // TODO: Investigate this, there seems to be a a bug if only pin8 is connected with pin10
+        Serial.println("ERROR, echo not detected ;c");
         return -1;
     }
+    Serial.print("distance to be read on pin");
+    Serial.print(echoPin);
+    Serial.print("\tCalculating distance; startTime is ");
+    Serial.print(startTime);
+    Serial.print("\t end time is ");
+    Serial.print(endTime);
+    Serial.print("\t :)\n");
 
     uint16_t deltaTime = endTime - startTime;
-    return (uint16_t)(deltaTime / 5.88235f);
+    return deltaTime;
+    //    return (uint16_t)(deltaTime / (4 * 5.88235f));
 }
 
 volatile bool UltrasonicDriver::handleInterrupt() {

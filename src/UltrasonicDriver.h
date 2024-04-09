@@ -22,9 +22,9 @@ public:
 
 private:
     bool initialized = false;
-    bool echoDetected = false;
+    bool echoDetected = false; // Rename echoDetected to better variable name? Is false if it succeeded?
     uint8_t triggerPin, echoPin;
-    uint16_t startTime, endTime;
+    volatile uint16_t startTime, endTime;
 
 public:
     bool isInitialized() const;

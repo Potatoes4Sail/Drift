@@ -18,26 +18,44 @@ Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
                                           ULTRASONIC_SENSOR2_ECHO_PIN);
 
 int main() {
+    // Timer interrupt stuff
+    TCCR1A = 0x00;          // Sets timer/counter1 control register back to default state.
+    TCCR1B = 0b001;         // Sets /1024 prescaler
+    TCNT1 = 0; // clear timer values
+    TIMSK1 = 0;
+    _BV(TOIE1);
+
+    PCICR |= _BV(PCIE0);
+
+    init();
     Serial.begin(115200);
     DDRB |= _BV(DDB5); // Set builtin LED to output
 
-    // Timer interrupt stuff
-    TCCR1A = 0x00;          // Sets timer/counter1 control register back to default state.
-    TCCR1B = 0b100;         // Sets /1024 prescaler
-    TCNT1 = 64754;          // Set overflow counter to 1 second
-    TIMSK1 |= _BV(TOIE1);
-    PCICR |= _BV(PCIE0);
+
     sei();
 
-    unsigned long startTime = 0;
+    unsigned long startTime1 = 0;
+    unsigned long startTime2 = 0;
+
+    Serial.println(TCCR1B);
 
     while (true) {
-        if ((millis() - startTime) > 1000) {
+        // Serial.println(millis());
+        if ((millis() - startTime1) > 100) {
+
             ultrasonicSensors.sendEcho();
-            startTime = millis();
+            startTime1 = millis();
         }
 
-        Serial.println(ultrasonicSensors.readLeftDistance());
+        if ((millis() - startTime2) > 250) {
+//            ultrasonicSensors.sendEcho();
+            ultrasonicSensors.readLeftDistance();
+            ultrasonicSensors.readFrontDistance();
+            ultrasonicSensors.readRightDistance();
+//            Serial.println(ultrasonicSensors.readLeftDistance());
+
+            startTime2 = millis();
+        }
     }
 }
 
