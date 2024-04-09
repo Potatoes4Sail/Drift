@@ -5,58 +5,47 @@
 #include "Ultrasonic.h"
 #include "helperFunctions.h"
 #include "L298Driver.h"
+#include "servoDriver.h"
 #include "pinDefinition.h"
 
 
-/*
-int main(void)
-{
-    DDRD |= (1 << DDD3);
-    DDRB |= (1 << DDB3);
-    // PD6 is now an output
-
-    TCCR2A |= _BV(COM2A1);
-    TCCR2A |= _BV(COM2B1);
-
-    TCCR2A |= _BV(WGM21) | _BV(WGM20);
-//    TCCR2A |= _BV(WGM20);
-
-    TCCR2B |= 0b001;
-    OCR2A = 180;
-    OCR2B = 10;
-
-    while (1);
-    {
-        // we have a working Fast PWM
-    }
-    return 1;
-} //*/
-
 int main() {
 
-    int8_t speed = 0;
-    L298Driver motor(MOTOR_PIN_PWM, MOTOR_PIN_FORWARD, MOTOR_PIN_REVERSE, 25);
-    motor.setSpeed(127);
-    _delay_ms(100);
-    motor.setSpeed(50);
+    DDRD = _BV(PD5) | _BV(PD6);
 
-//    while (true){
-//        speed++;
-//        if (speed>125) speed = 0;
-//        motor.setSpeed(speed);
-//        _delay_ms(50);
-//    }
+    TCCR0A = 0;
+    TCCR0B = 0;
 
-//    bool up = true;
-//    for(;;) {
-//        speed += up ? 1 : -1;
-//        if (speed == 0xff)
-//            up = false;
-//        else if (speed == 0x00)
-//            up = true;
-//
-//        _delay_ms(10);
-//        motor.setSpeed(speed);
-//    }
+    TCCR0A |= _BV(COM0A1);      // Sets A output high at bottom, and clears once it reaches OCR0A's value.
+    TCCR0A |= _BV(COM0B1);      // Sets B output high at bottom, and clears once it reaches OCR0B's value.
+
+    TCCR0A |= _BV(WGM01) | _BV(WGM00); // Sets Fast PWM bits.
+
+    TCCR0B = 0b0101; // 1024 prescaler.
+
+    // This gives a frequency of 60.9824 Hz.
+    // At 0.5 ms for minimum pulse ->
+    // (0.5 * 1000) / 60.9824 = 8.2
+
+    // At 2.3 mm for max pulse
+    // (2.3 * 1000) / 60.9824 = 8.2
+    const uint8_t PULSE_MIN = 15;           // min width pulse (1 ms)
+    const uint8_t PULSE_MAX = 31;           // max width pulse (2 ms)
+
+    OCR0A = (uint8_t) PULSE_MIN;
+    OCR0B = (uint8_t) PULSE_MAX;
+
+    servoDriver firstServo(5);
+
+    uint8_t num = 0;
+    while (true) {
+        firstServo.setAngle(0);
+        _delay_ms(2500);
+        firstServo.setAngle(90);
+        _delay_ms(2500);
+        firstServo.setAngle(180);
+        _delay_ms(2500);
+    }
+
     return 1;
 }
