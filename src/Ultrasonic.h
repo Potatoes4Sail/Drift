@@ -6,8 +6,6 @@
 #ifndef DRIFT_ULTRASONIC_H
 #define DRIFT_ULTRASONIC_H
 
-// #define UltrasonicSensor1_triggerPinBank DDRB
-
 #include <stdint-gcc.h>
 
 class Ultrasonic {
