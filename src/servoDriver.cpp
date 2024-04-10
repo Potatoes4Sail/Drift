@@ -7,14 +7,22 @@
 void servoDriverInit() {
     // Configure timer for interrupt based servo running.
 
-    // For timer0;
-    DDRD = _BV(PD5) | _BV(PD6);
+    // Set pins to outputs;
+    *portModeRegister(digitalPinToPort(SERVO_CONTROL_PIN_1)) |= digitalPinToBitMask(
+            SERVO_CONTROL_PIN_1);      // Sets PWM pin to output
 
+#if USE_SERVO_PIN_2
+    *portModeRegister(digitalPinToPort(SERVO_CONTROL_PIN_2)) |= digitalPinToBitMask(SERVO_CONTROL_PIN_2);      // Sets PWM pin to output
+#endif
+    // For timer0;
     TCCR0A = 0;
     TCCR0B = 0;
 
     TCCR0A |= _BV(COM0A1);      // Sets A output high at bottom, and clears once it reaches OCR0A's value.
+
+#if USE_SERVO_PIN_2
     TCCR0A |= _BV(COM0B1);      // Sets B output high at bottom, and clears once it reaches OCR0B's value.
+#endif
 
     TCCR0A |= _BV(WGM01) | _BV(WGM00); // Sets Fast PWM bits.
 
@@ -35,17 +43,19 @@ int setAngleA(uint8_t angleAmount) {
         return -1;
     }
 
-    OCR0A = (uint8_t) angleAmount * ANGLE_CONV + PULSE_MIN;
+    SERVO_CONTROL_BANK_1 = (uint8_t) (angleAmount * ANGLE_CONV + PULSE_MIN);
 
     return 0;
 }
 
+#if USE_SERVO_PIN_2
 int setAngleB(uint8_t angleAmount) {
     if ((angleAmount < 0) || (angleAmount > 90)) { // Invalid angle to attempt to set to, do nothing.
         return -1;
     }
 
-    OCR0B = (uint8_t) angleAmount * ANGLE_CONV + PULSE_MIN;
+    SERVO_CONTROL_BANK_2 = (uint8_t) (angleAmount * ANGLE_CONV + PULSE_MIN);
 
     return 0;
 }
+#endif
