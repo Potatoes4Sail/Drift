@@ -27,6 +27,8 @@ TODO: Write an actual description
 The Ultrasonic Sensor class was developed for the HC-SR04 sensor. In it's current implementation it uses the timer1 for
 interrupts.
 
+Echo pins are set on B bank of IO pins. All the pins will need to be on this bank to be able to use the interrupt features
+
 ### IMU
 
 ## Actuators
