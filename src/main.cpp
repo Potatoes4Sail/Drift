@@ -59,7 +59,9 @@ int main() {
     while (true) {
         setAngleA(0);
         _delay_ms(wait);
+#if USE_SERVO_PIN_2
         setAngleB(90);
+#endif
         _delay_ms(wait);
     }
 
