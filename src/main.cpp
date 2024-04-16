@@ -1,12 +1,14 @@
 
 
 #ifdef INCLUDECUSTOM
-//#define millis() countMillis()
-//#define micros() countMicros()
+#define millis() countMillis()
+#define micros() countMicros()
 #else
+
 #include <Arduino.h>
 #include <avr/io.h>
 #include <util/delay.h>
+
 #endif
 
 #include <avr/io.h>
@@ -18,6 +20,7 @@
 #include "servoDriver.h"
 #include "pinDefinition.h"
 #include "testCases.h"
+
 // Global variables
 Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
                                           ULTRASONIC_SENSOR0_ECHO_PIN,
@@ -55,19 +58,20 @@ int main() {
             startTime1 = millis();
         }
 
-int main() {
-    init();
-    Serial.begin(115200);
-        if ((millis() - startTime2) > 250) {
+        /*int main() {
+            init();
+            Serial.begin(115200);
+            if ((millis() - startTime2) > 250) {
 //            ultrasonicSensors.sendEcho();
-            ultrasonicSensors.readLeftDistance();
-            ultrasonicSensors.readFrontDistance();
-            ultrasonicSensors.readRightDistance();
+                ultrasonicSensors.readLeftDistance();
+                ultrasonicSensors.readFrontDistance();
+                ultrasonicSensors.readRightDistance();
 //            Serial.println(ultrasonicSensors.readLeftDistance());
 
-    return 1;
-            startTime2 = millis();
-        }
+                return 1;
+                startTime2 = millis();
+            }
+        }*/
     }
 }
 

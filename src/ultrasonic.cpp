@@ -12,7 +12,8 @@ Ultrasonic::Ultrasonic(uint8_t trig, uint8_t leftEcho, uint8_t frontEcho, uint8_
     frontDriver = UltrasonicDriver(triggerPin, frontEcho);
     rightDriver = UltrasonicDriver(triggerPin, rightEcho);
 
-    ULTRASONIC_SENSORS_PIN_MASK |= _BV(ULTRASONIC_SENSOR0_INT) | _BV(ULTRASONIC_SENSOR1_INT) | _BV(ULTRASONIC_SENSOR2_INT);
+    ULTRASONIC_SENSORS_PIN_MASK |=
+            _BV(ULTRASONIC_SENSOR0_INT) | _BV(ULTRASONIC_SENSOR1_INT) | _BV(ULTRASONIC_SENSOR2_INT);
 }
 
 void Ultrasonic::sendEcho() {
@@ -34,17 +35,17 @@ int32_t Ultrasonic::readRightDistance() {
 void volatile Ultrasonic::handleInterrupt() {
     switch (this->currentPolledSensor) {
         case LEFT:
-            if(leftDriver.handleInterrupt() ) {
+            if (leftDriver.handleInterrupt()) {
                 this->currentPolledSensor = FRONT;
             }
             break;
         case FRONT:
-            if(frontDriver.handleInterrupt()) {
+            if (frontDriver.handleInterrupt()) {
                 this->currentPolledSensor = RIGHT;
             }
             break;
         case RIGHT:
-            if(rightDriver.handleInterrupt()) {
+            if (rightDriver.handleInterrupt()) {
                 this->currentPolledSensor = LEFT;
             }
             break;
