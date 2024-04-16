@@ -42,8 +42,7 @@ L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reverse
 
     // TCCR2A |= (1 << WGM20); // Enables phase corrected PWM Mode.
 
-    TCCR2B = 0;
-    TCCR2B |= 0b011; // Sets Prescaler to 8 (~8 kHz), will start PWM at 0 duty cycle.
+    TCCR2B = 0b010; // Sets Prescaler to 32 (~8 kHz), will start PWM at 0 duty cycle.
 
     // ========================================
     //
