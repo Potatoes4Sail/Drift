@@ -17,7 +17,7 @@
 
 /// Uses macros to include the default Arduino define statements, such as constant values, simple functions and port mapping
 #ifdef INCLUDECUSTOM
-//#define Arduino_h
+#define Arduino_h
 
 #define HIGH 0x1
 #define LOW  0x0
@@ -86,6 +86,7 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 #else
 
 #include "Arduino.h"
+
 #endif
 
 //TODO: Troubleshoot why this doesn't seem to be working properly.
@@ -102,10 +103,11 @@ void stopInterrupts();
 
 void startInterrupts(); // uint8_t oldInterruptStatus);
 
+void customInitialization();
+
 unsigned long countPulse(volatile uint8_t *port, uint8_t bit, uint8_t stateMask, unsigned long maxloops);
 
 uint16_t measurePulse(uint8_t pin, uint8_t pinState, unsigned long timeout = 100000L);
-
 
 /*
  * TIMING FUNCTIONS USED BY ARDUINO. CAN REPLACE WITH CUSTOM ONES LATER.

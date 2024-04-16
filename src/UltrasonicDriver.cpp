@@ -58,7 +58,7 @@ int32_t UltrasonicDriver::readDistance() {
 volatile bool UltrasonicDriver::handleInterrupt() {
     // Rising Edge
     if(!echoDetected && (*portInputRegister(digitalPinToPort(echoPin)) &= digitalPinToBitMask(echoPin))) {
-        TCNT1 = 0;
+        //        TCNT1 = 0;    // Don't reset TCNT1, to allow for its use to time multiple things at once.
         startTime = TCNT1;
         echoDetected = true;
     } else if (echoDetected && !(*portInputRegister(digitalPinToPort(echoPin)) &= digitalPinToBitMask(echoPin))) {

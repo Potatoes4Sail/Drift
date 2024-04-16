@@ -17,6 +17,22 @@ void startInterrupts() {
     SREG = oldInterruptState;
 }
 
+void customInitialization() {
+    // Initalize the various timers:
+
+    // Timer1 (used for timing by ultrasonic sensors, pulse encoders, and ...?)
+    cli();
+    // Timer interrupt stuff
+    TCCR1A = 0x00;          // Sets timer/counter1 control register back to default state.
+    TCCR1B = 0b001;         // Sets /1024 prescaler
+    TCNT1 = 0; // clear timer values
+    TIMSK1 = 0;
+    _BV(TOIE1);
+
+    // Setup interrupts
+    sei();
+}
+
 unsigned long countPulse(volatile uint8_t *port, uint8_t bit, uint8_t stateMask, unsigned long maxloops) {
     unsigned long width = 0;
     // wait for any previous pulse to end
