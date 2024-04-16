@@ -34,6 +34,30 @@ int main() {
     Serial.begin(115200);
 
     customInitialization();
+
+
+    servoDriverInit();
+
+    L298Driver motor(MOTOR_PIN_PWM, MOTOR_PIN_FORWARD, MOTOR_PIN_REVERSE, 0);
+
+    *portModeRegister(digitalPinToPort(SERVO_CONTROL_PIN)) |= digitalPinToBitMask(SERVO_CONTROL_PIN);
+    DDRD |= _BV(PD5);
+
+    int8_t speed = 0;
+    while (true) {
+        motor.setSpeed(speed++);
+        setAngle(45);
+        _delay_ms(10);
+//        _delay_ms(1000);
+//        motor.setSpeed(0);
+//        _delay_ms(1000);
+//
+//        motor.setSpeed(speed);
+//        _delay_ms(1000);
+//        motor.setBrake(100);
+//        _delay_ms(1000);
+    }
+
     uint32_t startTime1 = 0;
     uint32_t startTime2 = 0;
 
@@ -49,6 +73,7 @@ int main() {
             ultrasonicSensors.readRightDistance();
             Serial.println(ultrasonicSensors.readLeftDistance());
             startTime2 = millis();
+
         }
     }
     return 1;
@@ -56,4 +81,18 @@ int main() {
 
 ISR(ULTRASONIC_SENSORS_INT_vect) {
     ultrasonicSensors.handleInterrupt();
+}
+
+
+// Controls for the Servo
+volatile const uint8_t ROLLOVER_SCALER_COUNT = 156;
+volatile uint8_t ServoCurrentScalerCount = 0;
+ISR(TIMER2_OVF_vect) {
+    ServoCurrentScalerCount++;
+    if (ServoCurrentScalerCount > ROLLOVER_SCALER_COUNT) {
+        PORTD |= _BV(PD5);
+        ServoCurrentScalerCount = 0;
+    } else if (ServoCurrentScalerCount > PULSE_SIZE) {
+        PORTD &= ~_BV(PD5);
+    }
 }

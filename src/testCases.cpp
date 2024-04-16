@@ -50,11 +50,7 @@ void servoSweepAngles() {
     uint8_t num = 0;
     int wait = 1000;
     while (true) {
-        setAngleA(0);
-        _delay_ms(wait);
-#if USE_SERVO_PIN_2
-        setAngleB(90);
-#endif
+        setAngle(0);
         _delay_ms(wait);
     }
 

@@ -20,9 +20,8 @@ void startInterrupts() {
 void customInitialization() {
     // Initalize the various timers:
 
-    // Timer1 (used for timing by ultrasonic sensors, pulse encoders, and ...?)
     cli();
-    // Timer interrupt stuff
+    // Timer1 (used for timing by ultrasonic sensors, pulse encoders, and ...?)
     TCCR1A = 0x00;          // Sets timer/counter1 control register back to default state.
     TCCR1B = 0b001;         // Sets /1024 prescaler
     TCNT1 = 0; // clear timer values
@@ -31,11 +30,21 @@ void customInitialization() {
 
     // Timer2:
     //      Used by motor and servo control (in very sketchy method ;c)
-    TCCR2A =
-    TCCR2B =
+    TCCR2A = 0;
+    TCCR2A |= (1 << COM2B1); // Enables PWM output for timer2 side B
+    TCCR2A |= (1 << WGM21) | (1 << WGM20); // Enables fast PWM Mode
 
+    TCCR2B = 0b010; // Sets Prescaler to 8 (~8 kHz), will start PWM at 0 duty cycle.
+
+    OCR2B = (uint8_t) 0; // Set PWM to 0%
     // Setup interrupts
+    TIMSK2 = _BV(TOIE2); // Enable the overflow interrupt
     sei();
+
+    // Initalize pins:
+
+    // Empty for now ~
+    Serial.println("Initalized");
 }
 
 unsigned long countPulse(volatile uint8_t *port, uint8_t bit, uint8_t stateMask, unsigned long maxloops) {

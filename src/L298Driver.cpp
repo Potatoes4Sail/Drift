@@ -27,8 +27,7 @@ L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reverse
     // ========================================
 
     *portModeRegister(digitalPinToPort(pwmPin)) |= digitalPinToBitMask(pwmPin);      // Sets PWM pin to output
-
-    OCR2B = (uint8_t) 0; // Set PWM to 0
+/*    OCR2B = (uint8_t) 0; // Set PWM to 0
 
     TCCR2A = 0;
 
@@ -40,7 +39,7 @@ L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reverse
 
     // TCCR2A |= (1 << WGM20); // Enables phase corrected PWM Mode.
 
-    TCCR2B = 0b010; // Sets Prescaler to 32 (~8 kHz), will start PWM at 0 duty cycle.
+    TCCR2B = 0b010; // Sets Prescaler to 32 (~8 kHz), will start PWM at 0 duty cycle.*/
 
     // ========================================
     //
@@ -49,8 +48,11 @@ L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reverse
     // ========================================
 
     // Set mode of both forward & reverse pins to output
-    *portModeRegister(digitalPinToPort(forwardPin)) &= ~digitalPinToBitMask(forwardPin);
-    *portModeRegister(digitalPinToPort(reversePin)) &= ~digitalPinToBitMask(reversePin);
+//    *portModeRegister(digitalPinToPort(forwardPin)) &= ~digitalPinToBitMask(forwardPin);
+//    *portModeRegister(digitalPinToPort(reversePin)) &= ~digitalPinToBitMask(reversePin);
+
+    *portModeRegister(digitalPinToPort(forwardPin)) |= digitalPinToBitMask(forwardPin);
+    *portModeRegister(digitalPinToPort(reversePin)) |= digitalPinToBitMask(reversePin);
 
     // Set both pins to low
     *portOutputRegister(digitalPinToPort(forwardPin)) &= ~digitalPinToBitMask(forwardPin);

@@ -26,12 +26,8 @@
 //
 //  ==================================
 
-#define SERVO_CONTROL_PIN_1     5
-#define SERVO_CONTROL_PIN_2     6
-#define SERVO_CONTROL_BANK_1    OCR0A
-#define SERVO_CONTROL_BANK_2    OCR0B
-#define USE_SERVO_PIN_2         false   // Allows for disabling parts of the code for servo2
-
+#define SERVO_CONTROL_PIN     5
+#define SERVO_CONTROL_BANK    OCR2A
 
 //  ==================================
 //
