@@ -8,7 +8,6 @@
 #include "servoDriver.h"
 #include "pinDefinition.h"
 
-
 void motorTestSetup(){
     int8_t speed = 0;
     L298Driver motor(MOTOR_PIN_PWM, MOTOR_PIN_FORWARD, MOTOR_PIN_REVERSE, 25);
@@ -26,6 +25,7 @@ void motorTestSetup(){
     motor.setBrake(100);
     _delay_ms(1000);
 }
+
 int main() {
 
 //    DDRD = _BV(PD5) | _BV(PD6);

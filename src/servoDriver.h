@@ -17,22 +17,8 @@ void servoDriverInit();
 
 int setAngleA(uint8_t angleAmount);
 
+#if USE_SERVO_PIN_2
 int setAngleB(uint8_t angleAmount);
-
-//class servoDriver {
-//public:
-//    servoDriver;
-//    // servoDriver(uint8_t servoPin, uint8_t deadbandVal = 15);
-//
-//    int setAngle(uint8_t angleAmount);
-//
-//private:
-////    uint8_t servoPin;
-//    uint8_t deadBandAmount;
-//    uint8_t angle;
-//
-//
-//};
-
+#endif
 
 #endif //DRIFT_SERVODRIVER_H

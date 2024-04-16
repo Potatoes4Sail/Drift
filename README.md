@@ -3,6 +3,7 @@
 TODO: Write an actual description
 
 # Pin Allocation
+
 ![Nano Pins.jpeg](documentation%2FNano%20Pins.jpeg)
 
 | Pin# | D Pin | Bank | Use                    | Priority |
