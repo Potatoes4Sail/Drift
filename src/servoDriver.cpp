@@ -6,13 +6,11 @@
 
 void servoDriverInit() {
     // Configure timer for interrupt based servo running.
-  
-    // Set pins to outputs;
-    *portModeRegister(digitalPinToPort(SERVO_CONTROL_PIN_1)) |= digitalPinToBitMask(
-            SERVO_CONTROL_PIN_1);      // Sets PWM pin to output
 
+    // Sets PWM pin to output
+    *portModeRegister(digitalPinToPort(SERVO_CONTROL_PIN_1)) |= digitalPinToBitMask(SERVO_CONTROL_PIN_1);
 #if USE_SERVO_PIN_2
-    *portModeRegister(digitalPinToPort(SERVO_CONTROL_PIN_2)) |= digitalPinToBitMask(SERVO_CONTROL_PIN_2);      // Sets PWM pin to output
+    *portModeRegister(digitalPinToPort(SERVO_CONTROL_PIN_2)) |= digitalPinToBitMask(SERVO_CONTROL_PIN_2);
 #endif
     // For timer0;
 
@@ -20,7 +18,7 @@ void servoDriverInit() {
     TCCR0B = 0;
 
     TCCR0A |= _BV(COM0A1);      // Sets A output high at bottom, and clears once it reaches OCR0A's value.
-  
+
 #if USE_SERVO_PIN_2
     TCCR0A |= _BV(COM0B1);      // Sets B output high at bottom, and clears once it reaches OCR0B's value.
 #endif
@@ -35,8 +33,6 @@ void servoDriverInit() {
 
     // At 2 mm for max pulse
     // (2 * 1000) / 60.9824 = 33
-
-
 }
 
 int setAngleA(uint8_t angleAmount) {
@@ -50,7 +46,6 @@ int setAngleA(uint8_t angleAmount) {
 }
 
 #if USE_SERVO_PIN_2
-
 int setAngleB(uint8_t angleAmount) {
     if ((angleAmount < 0) || (angleAmount > 90)) { // Invalid angle to attempt to set to, do nothing.
         return -1;

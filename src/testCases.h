@@ -5,13 +5,11 @@
 #ifndef DRIFT_TESTCASES_H
 #define DRIFT_TESTCASES_H
 
-#include "L298Driver.h"
-#include <avr/io.h>
-#include <util/delay.h>
-
 void motorTestSpinUnidirectional();
 
 void motorTestSpinBidirectional();
+
+void servoSweepAngles();
 
 
 #endif //DRIFT_TESTCASES_H
