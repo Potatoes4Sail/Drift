@@ -9,6 +9,23 @@
 #include "pinDefinition.h"
 
 
+void motorTestSetup(){
+    int8_t speed = 0;
+    L298Driver motor(MOTOR_PIN_PWM, MOTOR_PIN_FORWARD, MOTOR_PIN_REVERSE, 25);
+    motor.setSpeed(127);
+//    _delay_ms(100);
+//    motor.setSpeed(100);
+    _delay_ms(1000);
+    motor.setSpeed(0);
+    _delay_ms(1000);
+
+    motor.setSpeed(127);
+//    _delay_ms(100);
+//    motor.setSpeed(100);
+    _delay_ms(1000);
+    motor.setBrake(100);
+    _delay_ms(1000);
+}
 int main() {
 
 //    DDRD = _BV(PD5) | _BV(PD6);

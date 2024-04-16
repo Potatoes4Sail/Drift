@@ -15,11 +15,11 @@
 #define MOTOR_PIN_PWM          3
 #define MOTOR_PIN_FORWARD      4
 #define MOTOR_PIN_REVERSE      2
+//#define MOTOR_PWM_REGISTER     OCR2B   // Based on MOTOR_PIN_PWM.
 
 #define SERVO_CONTROL_PIN_1     5
 #define SERVO_CONTROL_PIN_2     6
 
-//#define MOTOR_PWM_REGISTER     OCR2B   // Based on MOTOR_PIN_PWM.
 
 // TODO: Add some method of verifying that the right pins are used (ALL PART OF THE SAME BANK)
 

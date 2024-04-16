@@ -37,13 +37,12 @@ L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reverse
     // TCCR2A |= (1 << COM2A1); // Enables PWM for timer side A
     TCCR2A |= (1 << COM2B1); // Enables PWM for timer side B
 
-//    TCCR2A |= (1 << WGM21) | (1 << WGM20); // Enables fast PWM Mode
-    TCCR2A |= (1 << WGM20); // Enables fast PWM Mode
+    TCCR2A |= (1 << WGM21) | (1 << WGM20); // Enables fast PWM Mode
+//    TCCR2A |= (1 << WGM20); // Enables PWM, phase correct Mode,
 
     // TCCR2A |= (1 << WGM20); // Enables phase corrected PWM Mode.
 
-    TCCR2B = 0;
-    TCCR2B |= 0b101; // Sets Prescaler to 8 (~8 kHz), will start PWM at 0 duty cycle.
+    TCCR2B = 0b010; // Sets Prescaler to 32 (~8 kHz), will start PWM at 0 duty cycle.
 
     // ========================================
     //
