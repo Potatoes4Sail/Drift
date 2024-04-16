@@ -4,8 +4,6 @@
 
 #include "L298Driver.h"
 
-#define MOTOR_PWM_REGISTER     OCR2B
-
 /// Constructor for class which drives the L298 motor drivers.
 /// \n LIMITATIONS: Both pwm signals must come from the same timer, and TIMER0 is currently chosen.
 /// Does not validate if the two motors are on the two outputs of the timers

@@ -29,6 +29,11 @@ void customInitialization() {
     TIMSK1 = 0;
     _BV(TOIE1);
 
+    // Timer2:
+    //      Used by motor and servo control (in very sketchy method ;c)
+    TCCR2A =
+    TCCR2B =
+
     // Setup interrupts
     sei();
 }
