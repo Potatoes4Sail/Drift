@@ -22,19 +22,34 @@
 #include "servoDriver.h"
 #include "pinDefinition.h"
 #include "testCases.h"
+#include "encoders.h"
 
 // Global variables
 Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
                                           ULTRASONIC_SENSOR0_ECHO_PIN,
                                           ULTRASONIC_SENSOR1_ECHO_PIN,
                                           ULTRASONIC_SENSOR2_ECHO_PIN);
+encoders wheelEncoders = encoders();
 
 int main() {
     init(); // Needed for arduino functionality
     Serial.begin(115200);
+    DDRB |= _BV(PB5);
+    volatile uint64_t i = 0;
+    while (true) {
+        _delay_ms(100);
+//        PORTB |= _BV(PB5);
+//        _delay_ms(100);
+//        PORTB &= ~_BV(PB5);
+//        Serial.print("-");
+        i++;
+    }
+}
+/*int main() {
+    init(); // Needed for arduino functionality
+    Serial.begin(115200);
 
     customInitialization();
-
 
     servoDriverInit();
 
@@ -42,7 +57,7 @@ int main() {
 
     *portModeRegister(digitalPinToPort(SERVO_CONTROL_PIN)) |= digitalPinToBitMask(SERVO_CONTROL_PIN);
     DDRD |= _BV(PD5);
-
+    micros();
     int8_t speed = 0;
     while (true) {
         motor.setSpeed(speed++);
@@ -77,7 +92,7 @@ int main() {
         }
     }
     return 1;
-}
+}*/
 
 ISR(ULTRASONIC_SENSORS_INT_vect) {
     ultrasonicSensors.handleInterrupt();
@@ -95,4 +110,34 @@ ISR(TIMER2_OVF_vect) {
     } else if (ServoCurrentScalerCount > PULSE_SIZE) {
         PORTD &= ~_BV(PD5);
     }
+}
+
+uint8_t oldInt = 0;
+ISR(PCINT1_vect) {
+    PORTB |= _BV(PB5);
+    uint8_t changedBits = oldInt ^ PORTC;
+    // Capturing the time at the start of the interrupt makes sure all of the encoders
+    // will get the 'right' time when the trigger, as ones later down would otherwise get delayed
+
+    if (changedBits & _BV(digitalPinToBitMask(MOTOR_ENCODER_A))) {
+        wheelEncoders.processInterrupt(BACK_ENCODER, A, PORTC & _BV(digitalPinToBitMask(MOTOR_ENCODER_A)));
+    }
+    if (changedBits & _BV(digitalPinToBitMask(MOTOR_ENCODER_B))) {
+        wheelEncoders.processInterrupt(BACK_ENCODER, B, PORTC & _BV(digitalPinToBitMask(MOTOR_ENCODER_B)));
+    }
+
+    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A))) {
+        wheelEncoders.processInterrupt(LEFT_ENCODER, A, PORTC & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)));
+    }
+    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B))) {
+        wheelEncoders.processInterrupt(LEFT_ENCODER, B, PORTC & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)));
+    }
+
+    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A))) {
+        wheelEncoders.processInterrupt(RIGHT_ENCODER, A, PORTC & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)));
+    }
+    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B))) {
+        wheelEncoders.processInterrupt(RIGHT_ENCODER, B, PORTC & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B)));
+    }
+    PORTB &= ~_BV(PB5);
 }
