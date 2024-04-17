@@ -45,61 +45,13 @@ int main() {
         i++;
     }
 }
-/*int main() {
-    init(); // Needed for arduino functionality
-    Serial.begin(115200);
-
-    customInitialization();
-
-    servoDriverInit();
-
-    L298Driver motor(MOTOR_PIN_PWM, MOTOR_PIN_FORWARD, MOTOR_PIN_REVERSE, 0);
-
-    *portModeRegister(digitalPinToPort(SERVO_CONTROL_PIN)) |= digitalPinToBitMask(SERVO_CONTROL_PIN);
-    DDRD |= _BV(PD5);
-    micros();
-    int8_t speed = 0;
-    while (true) {
-        motor.setSpeed(speed++);
-        setAngle(45);
-        _delay_ms(10);
-//        _delay_ms(1000);
-//        motor.setSpeed(0);
-//        _delay_ms(1000);
-//
-//        motor.setSpeed(speed);
-//        _delay_ms(1000);
-//        motor.setBrake(100);
-//        _delay_ms(1000);
-    }
-
-    uint32_t startTime1 = 0;
-    uint32_t startTime2 = 0;
-
-    // Beginnnings of main loop.
-    while (1) {
-        if ((millis()) - startTime1 > 100) {
-            ultrasonicSensors.sendEcho();
-        }
-
-        if ((millis() - startTime2) > 250) {
-            ultrasonicSensors.readLeftDistance();
-            ultrasonicSensors.readFrontDistance();
-            ultrasonicSensors.readRightDistance();
-            Serial.println(ultrasonicSensors.readLeftDistance());
-            startTime2 = millis();
-
-        }
-    }
-    return 1;
-}*/
 
 ISR(ULTRASONIC_SENSORS_INT_vect) {
     ultrasonicSensors.handleInterrupt();
 }
 
 
-// Controls for the Servo
+// Controls for the Servo (only slightly janky control implementation)
 volatile const uint8_t ROLLOVER_SCALER_COUNT = 156;
 volatile uint8_t ServoCurrentScalerCount = 0;
 ISR(TIMER2_OVF_vect) {
@@ -113,17 +65,39 @@ ISR(TIMER2_OVF_vect) {
 }
 
 uint8_t oldInt = 0;
+/**
+ * ISR is used for pulse detection and counting, and will return speed.
+ */
 ISR(PCINT1_vect) {
     PORTB |= _BV(PB5);
     uint8_t changedBits = oldInt ^ PORTC;
-    // Capturing the time at the start of the interrupt makes sure all of the encoders
-    // will get the 'right' time when the trigger, as ones later down would otherwise get delayed
 
-    if (changedBits & _BV(digitalPinToBitMask(MOTOR_ENCODER_A))) {
-        wheelEncoders.processInterrupt(BACK_ENCODER, A, PORTC & _BV(digitalPinToBitMask(MOTOR_ENCODER_A)));
+    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_A))) {
+        wheelEncoders.processInterrupt(BACK_ENCODER);
     }
-    if (changedBits & _BV(digitalPinToBitMask(MOTOR_ENCODER_B))) {
-        wheelEncoders.processInterrupt(BACK_ENCODER, B, PORTC & _BV(digitalPinToBitMask(MOTOR_ENCODER_B)));
+    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_B))) {
+        wheelEncoders.processInterrupt(BACK_ENCODER);
+    }
+
+    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A))) {
+        wheelEncoders.processInterrupt(LEFT_ENCODER);
+    }
+    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B))) {
+        wheelEncoders.processInterrupt(LEFT_ENCODER);
+    }
+
+    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A))) {
+        wheelEncoders.processInterrupt(RIGHT_ENCODER);
+    }
+    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B))) {
+        wheelEncoders.processInterrupt(RIGHT_ENCODER);
+    }
+    /*
+    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_A))) {
+        wheelEncoders.processInterrupt(BACK_ENCODER, A, PORTC & _BV(digitalPinToBitMask(BACK_ENCODER_A)));
+    }
+    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_B))) {
+        wheelEncoders.processInterrupt(BACK_ENCODER, B, PORTC & _BV(digitalPinToBitMask(BACK_ENCODER_B)));
     }
 
     if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A))) {
@@ -138,6 +112,6 @@ ISR(PCINT1_vect) {
     }
     if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B))) {
         wheelEncoders.processInterrupt(RIGHT_ENCODER, B, PORTC & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B)));
-    }
+    } //*/
     PORTB &= ~_BV(PB5);
 }

@@ -15,18 +15,27 @@ enum WheelEncoder {
     RIGHT_ENCODER   // 2
 };
 
+#define MINIMUM_US 10000
 class encoders {
 public:
     encoders();
 
-    int16_t getSpeed(WheelEncoder whichEncoder);
+    void processInterrupt(WheelEncoder whichEncoder);
 
-    void processInterrupt(WheelEncoder whichEncoder, encoderPinSide whichPin, uint8_t bitState);
+    void calculateSpeeds();
+
+    double getSpeed(WheelEncoder whichEncoder);
 
 private:
-    encoderDriverLL backEncoder;
-    encoderDriverLL leftEncoder;
-    encoderDriverLL rightEncoder;
+    uint16_t backEncoderPulseCount;
+    uint16_t leftEncoderPulseCount;
+    uint16_t rightEncoderPulseCount;
+
+    uint32_t lastTime;
+
+    double backEncoderSpeed;
+    double leftEncoderSpeed;
+    double rightEncoderSpeed;
 };
 
 

@@ -55,9 +55,9 @@
 //
 //  ===========================
 
-#define MOTOR_ENCODER_A         14
-#define MOTOR_ENCODER_B         15
-#define MOTOR_ENCODER_PULSES_PER_REV    100
+#define BACK_ENCODER_A         14
+#define BACK_ENCODER_B         15
+#define BACK_ENCODER_PULSES_PER_REV    100
 #define LEFT_WHEEL_ENCODER_A    16
 #define LEFT_WHEEL_ENCODER_B    17
 #define RIGHT_WHEEL_ENCODER_A   18
