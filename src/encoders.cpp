@@ -2,6 +2,7 @@
 // Created by Patrick on 2024-04-17.
 //
 
+#include <Arduino.h>
 #include "encoders.h"
 
 encoders::encoders() {
@@ -79,6 +80,7 @@ double encoders::getSpeed(WheelEncoder whichEncoder) {
     }
 }
 
+// TODO: Validate the math behind this function. It's currently wrong (+create github issue for this)
 void encoders::calculateSpeeds() {
     // Calculate the speed based on timeElasped/pulseCount
     uint32_t currentTime = micros();

@@ -1,9 +1,13 @@
 //
 // Created by Patrick on 2024-02-20.
 //
+#ifdef DEBUG_BUILD
+
+#include <HardwareSerial.h>
+
+#endif
 
 #include "helperFunctions.h"
-//#include "pinDefinition.h"
 
 static uint8_t oldInterruptState = SREG;
 
@@ -20,7 +24,8 @@ void startInterrupts() {
 void customInitialization() {
     // Initalize the various timers:
 
-    cli();
+    stopInterrupts();
+
     // Timer1 (used for timing by ultrasonic sensors, pulse encoders, and ...?)
     TCCR1A = 0x00;          // Sets timer/counter1 control register back to default state.
     TCCR1B = 0b001;         // Sets /1024 prescaler
@@ -42,9 +47,12 @@ void customInitialization() {
     sei();
 
     // Initalize pins:
-
+    startInterrupts();
     // Empty for now ~
+
+#ifdef DEBUG_BUILD
     Serial.println("Initalized");
+#endif
 }
 
 unsigned long countPulse(volatile uint8_t *port, uint8_t bit, uint8_t stateMask, unsigned long maxloops) {

@@ -3,6 +3,7 @@
 //
 
 #include <util/delay.h>
+#include <HardwareSerial.h>
 #include "UltrasonicDriver.h"
 #include "helperFunctions.h"
 

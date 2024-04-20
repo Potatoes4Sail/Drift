@@ -6,8 +6,6 @@
 #define DRIFT_SERVODRIVER_H
 
 #include <avr/io.h>
-#include "helperFunctions.h"
-#include "pinDefinition.h"
 
 volatile static uint8_t PULSE_SIZE = 12;          // Angle
 const uint8_t PULSE_MIN = 8;           // min width pulse (1 ms)

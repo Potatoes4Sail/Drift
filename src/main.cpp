@@ -1,22 +1,8 @@
-
-
-#ifdef INCLUDECUSTOM
-#define millis() countMillis()
-#define micros() countMicros()
-
-#define init() //init()
-#else
-
 #include <Arduino.h>
-
-#endif
-
 #include <avr/io.h>
 #include <util/delay.h>
-#include <HardwareSerial.h>
 #include "ultrasonic.h"
 #include "pinDefinition.h"
-#include "Ultrasonic.h"
 #include "helperFunctions.h"
 #include "L298Driver.h"
 #include "servoDriver.h"
@@ -34,6 +20,9 @@ encoders wheelEncoders = encoders();
 int main() {
     init(); // Needed for arduino functionality
     Serial.begin(115200);
+
+    customInitialization(); // Needed for initializing the timers.
+
     DDRB |= _BV(PB5);
     volatile uint64_t i = 0;
     while (true) {
@@ -69,7 +58,7 @@ uint8_t oldInt = 0;
  * ISR is used for pulse detection and counting, and will return speed.
  */
 ISR(PCINT1_vect) {
-    PORTB |= _BV(PB5);
+//    PORTB |= _BV(PB5);  // Used to time function with oscilloscope
     uint8_t changedBits = oldInt ^ PORTC;
 
     if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_A))) {
@@ -92,26 +81,6 @@ ISR(PCINT1_vect) {
     if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B))) {
         wheelEncoders.processInterrupt(RIGHT_ENCODER);
     }
-    /*
-    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_A))) {
-        wheelEncoders.processInterrupt(BACK_ENCODER, A, PORTC & _BV(digitalPinToBitMask(BACK_ENCODER_A)));
-    }
-    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_B))) {
-        wheelEncoders.processInterrupt(BACK_ENCODER, B, PORTC & _BV(digitalPinToBitMask(BACK_ENCODER_B)));
-    }
 
-    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A))) {
-        wheelEncoders.processInterrupt(LEFT_ENCODER, A, PORTC & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)));
-    }
-    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B))) {
-        wheelEncoders.processInterrupt(LEFT_ENCODER, B, PORTC & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)));
-    }
-
-    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A))) {
-        wheelEncoders.processInterrupt(RIGHT_ENCODER, A, PORTC & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)));
-    }
-    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B))) {
-        wheelEncoders.processInterrupt(RIGHT_ENCODER, B, PORTC & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B)));
-    } //*/
-    PORTB &= ~_BV(PB5);
+//    PORTB &= ~_BV(PB5);  // Used to time function with oscilloscope
 }

@@ -66,11 +66,5 @@
 
 #define ENCODER_PIN_MASK        0b00111111
 
-//    | 23   | D14   | PC0  | Motor Encoder A        | Medium   |
-//    | 24   | D15   | PC1  | Motor Encoder B        | Medium   |
-//    | 25   | D16   | PC2  | Left Wheel Encoder A   | Medium   |
-//    | 26   | D17   | PC3  | Left Wheel Encoder B   | Medium   |
-//    | 27   | D18   | PC4  | Right Wheel Encoder A  | Medium   |
-//    | 28   | D19   | PC5  | Right Wheel Encoder B  | Medium   |
 // TODO: Add some method of verifying that the right pins are used (ALL PART OF THE SAME BANK)
 #endif //DRIFT_PINDEFINITION_H

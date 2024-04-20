@@ -6,7 +6,6 @@
 #define DRIFT_ENCODERS_H
 
 #include <avr/io.h>
-#include "encoderDriverLl.h"
 #include "pinDefinition.h"
 
 enum WheelEncoder {

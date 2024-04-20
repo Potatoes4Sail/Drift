@@ -16,7 +16,7 @@
 #define TGL_BIT(PORT, BIT) PORT ^= _BV(BIT);
 
 /// Uses macros to include the default Arduino define statements, such as constant values, simple functions and port mapping
-#ifdef INCLUDECUSTOM
+#ifndef INCLUDECUSTOM
 #define Arduino_h
 
 #define HIGH 0x1
