@@ -12,7 +12,6 @@ TODO: Write an actual description
 | 2    | D4    | PD4  | Motor Forward Dir      | Low      |
 | 32   | D2    | PD2  | Motor Reverse Dir      | Low      |
 | 9    | D5    | PD5  | Servo Control 1        | High     |
-| 10   | D6    | PD6  | Servo Control 2        | High     |
 | 11   | D7    | PD7  | Ultrasonic Trigger Pin | Medium   |
 | 12   | D8    | PB0  | Ultrasonic Echo Pin 0  | Medium   |
 | 13   | D9    | PB1  | Ultrasonic Echo Pin 1  | Medium   |
@@ -23,6 +22,14 @@ TODO: Write an actual description
 | 26   | D17   | PC3  | Left Wheel Encoder B   | Medium   |
 | 27   | D18   | PC4  | Right Wheel Encoder A  | Medium   |
 | 28   | D19   | PC5  | Right Wheel Encoder B  | Medium   |
+
+[//]: # (| 10   | D6    | PD6  | Servo Control 2        | High     |)
+
+# Timer allocation:
+
+Timer0 - Left for Arduino functions (micros & millis)
+Timer1 - Use for timing durations of echo pulses
+Timer2 - Used for motor & servo PWM control.
 
 ## Communication Protocols
 

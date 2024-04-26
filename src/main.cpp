@@ -9,6 +9,7 @@
 #include "pinDefinition.h"
 #include "testCases.h"
 #include "encoders.h"
+#include <IBusBM.h>
 
 // Global variables
 Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
@@ -17,20 +18,54 @@ Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
                                           ULTRASONIC_SENSOR2_ECHO_PIN);
 encoders wheelEncoders = encoders();
 
+L298Driver motor(3, 4, 2, 15);
+
+IBusBM IBus; // IBus object
+
 int main() {
     init(); // Needed for arduino functionality
-    Serial.begin(115200);
+//    Serial.begin(115200);
+    IBus.begin(Serial);   // first instance - Uses compA of Timer0,
+    servoDriverInit();
+    Serial.println("Start IBus2PWM");
 
     customInitialization(); // Needed for initializing the timers.
 
     DDRB |= _BV(PB5);
     volatile uint64_t i = 0;
+
+    int saveServoVal = 0;
+    int saveMotorVal = 0;
+
+    int servoVal;
+    int motorVal;
+
     while (true) {
         _delay_ms(100);
-//        PORTB |= _BV(PB5);
-//        _delay_ms(100);
-//        PORTB &= ~_BV(PB5);
-//        Serial.print("-");
+
+        servoVal = IBus.readChannel(0); // get latest value for servo channel 1
+        motorVal = IBus.readChannel(2); // get latest value for servo channel 1
+
+        if (saveServoVal != servoVal) {
+            setAngle_us(servoVal);
+            Serial.print("Servo: \t");
+            Serial.print(servoVal); // display new value in microseconds on PC
+            Serial.print("\t - pulse: \t");
+            Serial.print(getPulseSize());
+            Serial.print("\n");
+            saveServoVal = servoVal;
+        }
+
+        if (saveMotorVal != motorVal) {
+            motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
+            Serial.print("Motor: \t");
+            Serial.print(motorVal); // display new value in microseconds on PC
+            Serial.print("\t - pulse: \t");
+            Serial.print((motorVal - 1500.0) * (127.0 / 500.0));
+            Serial.print("\n");
+            saveMotorVal = motorVal;
+        }
+
         i++;
     }
 }
@@ -48,7 +83,7 @@ ISR(TIMER2_OVF_vect) {
     if (ServoCurrentScalerCount > ROLLOVER_SCALER_COUNT) {
         PORTD |= _BV(PD5);
         ServoCurrentScalerCount = 0;
-    } else if (ServoCurrentScalerCount > PULSE_SIZE) {
+    } else if (ServoCurrentScalerCount > getPulseSize()) {
         PORTD &= ~_BV(PD5);
     }
 }

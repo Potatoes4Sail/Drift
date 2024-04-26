@@ -17,8 +17,25 @@ int setAngle(uint8_t angleAmount) {
         return -1;
     }
 
-    PULSE_SIZE = (uint8_t) (angleAmount * ANGLE_CONV + PULSE_MIN);
+    setPulseSize((uint8_t) (angleAmount * ANGLE_CONV + PULSE_MIN));
 
     return 0;
 }
+
+
+int setAngle_us(uint16_t angleAmount) {
+    uint16_t angleAmountLimited = constrain(angleAmount, 1000, 2000);
+    setPulseSize(24 - angleAmountLimited / 125 - 1);
+    return 0;
+}
+
+void setPulseSize(uint8_t PULSE) {
+    PULSE_SIZE = PULSE;
+}
+
+uint8_t getPulseSize() {
+    return PULSE_SIZE;
+}
+
+
 
