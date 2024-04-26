@@ -1,69 +1,121 @@
 #include <Arduino.h>
 #include <avr/io.h>
 #include <util/delay.h>
-
-#include "Ultrasonic.h"
+#include "ultrasonic.h"
+#include "pinDefinition.h"
 #include "helperFunctions.h"
 #include "L298Driver.h"
 #include "servoDriver.h"
 #include "pinDefinition.h"
+#include "testCases.h"
+#include "encoders.h"
+#include <IBusBM.h>
 
-void motorTestSetup(){
-    int8_t speed = 0;
-    L298Driver motor(MOTOR_PIN_PWM, MOTOR_PIN_FORWARD, MOTOR_PIN_REVERSE, 25);
-    motor.setSpeed(127);
-//    _delay_ms(100);
-//    motor.setSpeed(100);
-    _delay_ms(1000);
-    motor.setSpeed(0);
-    _delay_ms(1000);
+// Global variables
+Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
+                                          ULTRASONIC_SENSOR0_ECHO_PIN,
+                                          ULTRASONIC_SENSOR1_ECHO_PIN,
+                                          ULTRASONIC_SENSOR2_ECHO_PIN);
+encoders wheelEncoders = encoders();
 
-    motor.setSpeed(127);
-//    _delay_ms(100);
-//    motor.setSpeed(100);
-    _delay_ms(1000);
-    motor.setBrake(100);
-    _delay_ms(1000);
-}
+L298Driver motor(3, 4, 2, 15);
+
+IBusBM IBus; // IBus object
 
 int main() {
-
-//    DDRD = _BV(PD5) | _BV(PD6);
-//
-//    TCCR0A = 0;
-//    TCCR0B = 0;
-//
-//    TCCR0A |= _BV(COM0A1);      // Sets A output high at bottom, and clears once it reaches OCR0A's value.
-//    TCCR0A |= _BV(COM0B1);      // Sets B output high at bottom, and clears once it reaches OCR0B's value.
-//
-//    TCCR0A |= _BV(WGM01) | _BV(WGM00); // Sets Fast PWM bits.
-//
-//    TCCR0B = 0b0101; // 1024 prescaler.
-//
-//    // This gives a frequency of 60.9824 Hz.
-//    // At 0.5 ms for minimum pulse ->
-//    // (0.5 * 1000) / 60.9824 = 8.2
-//
-//    // At 2.3 mm for max pulse
-//    // (2.3 * 1000) / 60.9824 = 8.2
-//    const uint8_t PULSE_MIN = 15;           // min width pulse (1 ms)
-//    const uint8_t PULSE_MAX = 31;           // max width pulse (2 ms)
-//
-//    OCR0A = (uint8_t) PULSE_MIN;
-//    OCR0B = (uint8_t) PULSE_MAX;
-
+    init(); // Needed for arduino functionality
+//    Serial.begin(115200);
+    IBus.begin(Serial);   // first instance - Uses compA of Timer0,
     servoDriverInit();
+    Serial.println("Start IBus2PWM");
 
-    uint8_t num = 0;
-    int wait = 1000;
+    customInitialization(); // Needed for initializing the timers.
+
+    DDRB |= _BV(PB5);
+    volatile uint64_t i = 0;
+
+    int saveServoVal = 0;
+    int saveMotorVal = 0;
+
+    int servoVal;
+    int motorVal;
+
     while (true) {
-        setAngleA(0);
-        _delay_ms(wait);
-#if USE_SERVO_PIN_2
-        setAngleB(90);
-#endif
-        _delay_ms(wait);
+        _delay_ms(100);
+
+        servoVal = IBus.readChannel(0); // get latest value for servo channel 1
+        motorVal = IBus.readChannel(2); // get latest value for servo channel 1
+
+        if (saveServoVal != servoVal) {
+            setAngle_us(servoVal);
+            Serial.print("Servo: \t");
+            Serial.print(servoVal); // display new value in microseconds on PC
+            Serial.print("\t - pulse: \t");
+            Serial.print(getPulseSize());
+            Serial.print("\n");
+            saveServoVal = servoVal;
+        }
+
+        if (saveMotorVal != motorVal) {
+            motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
+            Serial.print("Motor: \t");
+            Serial.print(motorVal); // display new value in microseconds on PC
+            Serial.print("\t - pulse: \t");
+            Serial.print((motorVal - 1500.0) * (127.0 / 500.0));
+            Serial.print("\n");
+            saveMotorVal = motorVal;
+        }
+
+        i++;
+    }
+}
+
+ISR(ULTRASONIC_SENSORS_INT_vect) {
+    ultrasonicSensors.handleInterrupt();
+}
+
+
+// Controls for the Servo (only slightly janky control implementation)
+volatile const uint8_t ROLLOVER_SCALER_COUNT = 156;
+volatile uint8_t ServoCurrentScalerCount = 0;
+ISR(TIMER2_OVF_vect) {
+    ServoCurrentScalerCount++;
+    if (ServoCurrentScalerCount > ROLLOVER_SCALER_COUNT) {
+        PORTD |= _BV(PD5);
+        ServoCurrentScalerCount = 0;
+    } else if (ServoCurrentScalerCount > getPulseSize()) {
+        PORTD &= ~_BV(PD5);
+    }
+}
+
+uint8_t oldInt = 0;
+/**
+ * ISR is used for pulse detection and counting, and will return speed.
+ */
+ISR(PCINT1_vect) {
+//    PORTB |= _BV(PB5);  // Used to time function with oscilloscope
+    uint8_t changedBits = oldInt ^ PORTC;
+
+    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_A))) {
+        wheelEncoders.processInterrupt(BACK_ENCODER);
+    }
+    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_B))) {
+        wheelEncoders.processInterrupt(BACK_ENCODER);
     }
 
-    return 1;
+    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A))) {
+        wheelEncoders.processInterrupt(LEFT_ENCODER);
+    }
+    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B))) {
+        wheelEncoders.processInterrupt(LEFT_ENCODER);
+    }
+
+    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A))) {
+        wheelEncoders.processInterrupt(RIGHT_ENCODER);
+    }
+    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B))) {
+        wheelEncoders.processInterrupt(RIGHT_ENCODER);
+    }
+
+//    PORTB &= ~_BV(PB5);  // Used to time function with oscilloscope
 }

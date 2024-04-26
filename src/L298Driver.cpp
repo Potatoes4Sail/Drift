@@ -4,8 +4,6 @@
 
 #include "L298Driver.h"
 
-#define MOTOR_PWM_REGISTER     OCR2B
-
 /// Constructor for class which drives the L298 motor drivers.
 /// \n LIMITATIONS: Both pwm signals must come from the same timer, and TIMER0 is currently chosen.
 /// Does not validate if the two motors are on the two outputs of the timers
@@ -29,8 +27,7 @@ L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reverse
     // ========================================
 
     *portModeRegister(digitalPinToPort(pwmPin)) |= digitalPinToBitMask(pwmPin);      // Sets PWM pin to output
-
-    OCR2B = (uint8_t) 0; // Set PWM to 0
+/*    OCR2B = (uint8_t) 0; // Set PWM to 0
 
     TCCR2A = 0;
 
@@ -42,7 +39,7 @@ L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reverse
 
     // TCCR2A |= (1 << WGM20); // Enables phase corrected PWM Mode.
 
-    TCCR2B = 0b010; // Sets Prescaler to 32 (~8 kHz), will start PWM at 0 duty cycle.
+    TCCR2B = 0b010; // Sets Prescaler to 32 (~8 kHz), will start PWM at 0 duty cycle.*/
 
     // ========================================
     //
@@ -51,8 +48,11 @@ L298Driver::L298Driver(uint8_t pwmPinVal, uint8_t forwardPinVal, uint8_t reverse
     // ========================================
 
     // Set mode of both forward & reverse pins to output
-    *portModeRegister(digitalPinToPort(forwardPin)) &= ~digitalPinToBitMask(forwardPin);
-    *portModeRegister(digitalPinToPort(reversePin)) &= ~digitalPinToBitMask(reversePin);
+//    *portModeRegister(digitalPinToPort(forwardPin)) &= ~digitalPinToBitMask(forwardPin);
+//    *portModeRegister(digitalPinToPort(reversePin)) &= ~digitalPinToBitMask(reversePin);
+
+    *portModeRegister(digitalPinToPort(forwardPin)) |= digitalPinToBitMask(forwardPin);
+    *portModeRegister(digitalPinToPort(reversePin)) |= digitalPinToBitMask(reversePin);
 
     // Set both pins to low
     *portOutputRegister(digitalPinToPort(forwardPin)) &= ~digitalPinToBitMask(forwardPin);
