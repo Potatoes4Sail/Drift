@@ -20,7 +20,7 @@ Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
 encoders wheelEncoders = encoders();
 
 L298Driver motor(3, 4, 2, 15);
-bst7690Driver newMotor(3, 4, 2, 15);
+BST7960Driver newMotor(MOTOR_PIN_PWM_FORWARD, MOTOR_PIN_PWM_REVERSE, 15);
 
 IBusBM IBus; // IBus object
 

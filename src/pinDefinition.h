@@ -20,6 +20,7 @@
 #define MOTOR_PWM_FORWARD_REGISTER     OCR2A   // Based on MOTOR_PIN_PWM.
 #define MOTOR_PWM_REVERSE_REGISTER     OCR2B   // Based on MOTOR_PIN_PWM.
 
+#define MOTOR_PWM_REGISTER MOTOR_PWM_REVERSE_REGISTER
 //  ==================================
 //
 //         SERVO PINS:
