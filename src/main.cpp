@@ -19,8 +19,8 @@ Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
                                           ULTRASONIC_SENSOR2_ECHO_PIN);
 encoders wheelEncoders = encoders();
 
-L298Driver motor(3, 4, 2, 15);
-BST7960Driver newMotor(MOTOR_PIN_PWM_FORWARD, MOTOR_PIN_PWM_REVERSE, 15);
+L298Driver oldMotor(3, 4, 2, 15);
+BST7960Driver motor(MOTOR_PIN_PWM_FORWARD, MOTOR_PIN_PWM_REVERSE, 15);
 
 IBusBM IBus; // IBus object
 
@@ -29,7 +29,6 @@ int main() {
 //    Serial.begin(115200);
     IBus.begin(Serial);   // first instance - Uses compA of Timer0,
     servoDriverInit();
-    Serial.println("Start IBus2PWM");
 
     customInitialization(); // Needed for initializing the timers.
 
@@ -42,6 +41,7 @@ int main() {
     int servoVal;
     int motorVal;
 
+    Serial.println("Start IBus2PWM");
     while (true) {
         _delay_ms(100);
 

@@ -23,7 +23,7 @@ public:
 //    int setBrake(uint8_t breakAmountVar);
 private:
     /// Speed of motor, ranging from -128 to 127
-    int8_t speed;
+    uint8_t speed;
     uint8_t direction;
 
     /// Amount 0-255 to apply break

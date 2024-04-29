@@ -14,7 +14,7 @@
 //         MOTOR CONTROL PINS:
 //
 //  ==================================
-#define MOTOR_PIN_PWM_FORWARD      10
+#define MOTOR_PIN_PWM_FORWARD      11
 #define MOTOR_PIN_PWM_REVERSE      3
 
 #define MOTOR_PWM_FORWARD_REGISTER     OCR2A   // Based on MOTOR_PIN_PWM.

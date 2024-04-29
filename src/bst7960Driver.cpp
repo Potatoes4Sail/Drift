@@ -2,6 +2,7 @@
 // Created by Patrick on 2024-04-29.
 //
 
+#include <HardwareSerial.h>
 #include "bst7960Driver.h"
 
 
@@ -37,10 +38,10 @@ BST7960Driver::BST7960Driver(uint8_t forwardPWMPin, uint8_t reversePWMPin, uint8
 /// \param speedVar - int8_t value, must be between -127 and 127
 /// \return
 int BST7960Driver::setSpeed(int8_t speedVar) {
-    this->direction = (speedVar > 0 ? FORWARD : REVERSE);
+    this->direction = ((0 < speedVar) ? FORWARD : REVERSE);
     this->speed = 2 * abs(speedVar);
 
-    if (speedVar < deadband) {
+    if (speed < deadband) {
         this->direction = NONE;
         this->speed = 0;
     }
@@ -75,6 +76,12 @@ int BST7960Driver::setSpeed(int8_t speedVar) {
 
 // TODO: Allow for setting the alternative register to interrupt, and imporve resolution of servo.
 void BST7960Driver::setRegisterSpeed(uint8_t motor) {
+    Serial.print("function - speed = ");
+    Serial.print(speed);
+    Serial.print("\t and motor#\t");
+    Serial.print(motor);
+    Serial.print("\n");
+
     TCCR2A &= ~0b11110000; // Turns off both of the outputs.
     // Set both comparator timers to 0. 
     MOTOR_PWM_FORWARD_REGISTER = 0;
@@ -89,6 +96,7 @@ void BST7960Driver::setRegisterSpeed(uint8_t motor) {
         case 0:
             break;
         case FORWARD:
+            Serial.println("FORWARD!");
             OCR2A = this->speed;
             TCCR2A |= _BV(COM2A1);
             break;
@@ -98,26 +106,3 @@ void BST7960Driver::setRegisterSpeed(uint8_t motor) {
             break;
     }
 }
-
-
-//int BST7960Driver::setBrake(uint8_t brakeAmountVar) {
-//    this->brakeAmount = brakeAmountVar;
-//    if (brakeAmount > deadband) {
-//        // Braking is accomplished by setting forward and reverse to same state, and having pwm high
-//        *portOutputRegister(digitalPinToPort(reversePWMPin)) |= digitalPinToBitMask(
-//                reversePWMPin); // Set reverse pin to high
-//        *portOutputRegister(digitalPinToPort(forwardPWMPin)) |= digitalPinToBitMask(
-//                forwardPWMPin); // Set forward pin to high
-//
-//        MOTOR_PWM_REGISTER = (uint8_t) brakeAmount;
-//    } else {
-//        // Called brake function but didn't break enough to actually do anything
-//        *portOutputRegister(digitalPinToPort(reversePWMPin)) |= digitalPinToBitMask(
-//                reversePWMPin); // Set reverse pin to high
-//        *portOutputRegister(digitalPinToPort(forwardPWMPin)) |= digitalPinToBitMask(
-//                forwardPWMPin); // Set forward pin to high
-//
-//        MOTOR_PWM_REGISTER = (uint8_t) 0;
-//    }
-//    return 0;
-//}
