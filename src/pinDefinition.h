@@ -14,11 +14,11 @@
 //         MOTOR CONTROL PINS:
 //
 //  ==================================
-#define MOTOR_PIN_PWM          3
-#define MOTOR_PIN_FORWARD      4
-#define MOTOR_PIN_REVERSE      2
+#define MOTOR_PIN_PWM_FORWARD      10
+#define MOTOR_PIN_PWM_REVERSE      3
 
-#define MOTOR_PWM_REGISTER     OCR2B   // Based on MOTOR_PIN_PWM.
+#define MOTOR_PWM_FORWARD_REGISTER     OCR2A   // Based on MOTOR_PIN_PWM.
+#define MOTOR_PWM_REVERSE_REGISTER     OCR2B   // Based on MOTOR_PIN_PWM.
 
 //  ==================================
 //
@@ -57,12 +57,12 @@
 
 #define BACK_ENCODER_A         14
 #define BACK_ENCODER_B         15
-#define BACK_ENCODER_PULSES_PER_REV    100
+#define BACK_ENCODER_PULSES_PER_REV    600
 #define LEFT_WHEEL_ENCODER_A    16
 #define LEFT_WHEEL_ENCODER_B    17
 #define RIGHT_WHEEL_ENCODER_A   18
 #define RIGHT_WHEEL_ENCODER_B   19
-#define WHEEL_ENCODER_PULSES_PER_REV    500
+#define WHEEL_ENCODER_PULSES_PER_REV    600
 
 #define ENCODER_PIN_MASK        0b00111111
 

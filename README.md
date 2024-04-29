@@ -1,14 +1,16 @@
 # Project description
 
 TODO: Write an actual description
-
+[printer.cfg](..%2F..%2F..%2F..%2FDocuments%2FTrident%2FInitial%20Configs%2F2024-04-28%2Fprinter_data%2Fconfig%2Fprinter.cfg)
 # Pin Allocation
 
 ![Nano Pins.jpeg](documentation%2FNano%20Pins.jpeg)
 
 | Pin# | D Pin | Bank | Use                    | Priority |
 |------|-------|------|------------------------|----------|
+| 30   | RX0   | PD0  | IBus reciever          | High     |
 | 1    | D3    | PD3  | Motor PWM 1            | High     |
+| 1    | D11   | PB3  | Motor PWM 1            | High     |     ADDED
 | 2    | D4    | PD4  | Motor Forward Dir      | Low      |
 | 32   | D2    | PD2  | Motor Reverse Dir      | Low      |
 | 9    | D5    | PD5  | Servo Control 1        | High     |

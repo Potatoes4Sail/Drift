@@ -36,11 +36,13 @@ void customInitialization() {
     // Timer2:
     //      Used by motor and servo control (in very sketchy method ;c)
     TCCR2A = 0;
+    TCCR2A |= (1 << COM2A1); // Enables PWM output for timer2 side A
     TCCR2A |= (1 << COM2B1); // Enables PWM output for timer2 side B
     TCCR2A |= (1 << WGM21) | (1 << WGM20); // Enables fast PWM Mode
 
     TCCR2B = 0b010; // Sets Prescaler to 8 (~8 kHz), will start PWM at 0 duty cycle.
 
+    OCR2A = (uint8_t) 0; // Set PWM to 0%
     OCR2B = (uint8_t) 0; // Set PWM to 0%
     // Setup interrupts
     TIMSK2 = _BV(TOIE2); // Enable the overflow interrupt
@@ -79,7 +81,7 @@ unsigned long countPulse(volatile uint8_t *port, uint8_t bit, uint8_t stateMask,
 /// \param pin - Pin to measure state of
 /// \param pinState - state (HIGH/LOW) to measure duration
 /// \param timeout - default timeout (100 ms)
-/// \return Duration of pulse or 0 if duration is 0.
+/// \return Duration of pulse or 0 if duration is 0.`
 uint16_t measurePulse(uint8_t pin, uint8_t pinState, unsigned long timeout) {
 // cache the port and bit of the pin in order to speed up the
 // pulse width measuring loop and achieve finer resolution.  calling

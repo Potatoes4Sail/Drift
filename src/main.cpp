@@ -9,6 +9,7 @@
 #include "pinDefinition.h"
 #include "testCases.h"
 #include "encoders.h"
+#include "bst7960Driver.h"
 #include <IBusBM.h>
 
 // Global variables
@@ -19,6 +20,7 @@ Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
 encoders wheelEncoders = encoders();
 
 L298Driver motor(3, 4, 2, 15);
+bst7690Driver newMotor(3, 4, 2, 15);
 
 IBusBM IBus; // IBus object
 
@@ -43,8 +45,8 @@ int main() {
     while (true) {
         _delay_ms(100);
 
-        servoVal = IBus.readChannel(0); // get latest value for servo channel 1
-        motorVal = IBus.readChannel(2); // get latest value for servo channel 1
+        servoVal = IBus.readChannel(3); // get latest value for servo channel 4 (left horizontal)
+        motorVal = IBus.readChannel(1); // get latest value for servo channel 2 (right vertical)
 
         if (saveServoVal != servoVal) {
             setAngle_us(servoVal);
