@@ -42,17 +42,6 @@ int main() {
     int servoVal;
     int motorVal;
 
-    customInitialization(); // Needed for initializing the timers.
-
-    DDRB |= _BV(PB5);
-    volatile uint64_t i = 0;
-
-    int saveServoVal = 0;
-    int saveMotorVal = 0;
-
-    int servoVal;
-    int motorVal;
-
     Serial.println("Start IBus2PWM");
     while (true) {
         _delay_ms(100);
