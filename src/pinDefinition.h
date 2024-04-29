@@ -21,6 +21,7 @@
 #define MOTOR_PWM_REVERSE_REGISTER     OCR2B   // Based on MOTOR_PIN_PWM.
 
 #define MOTOR_PWM_REGISTER MOTOR_PWM_REVERSE_REGISTER
+
 //  ==================================
 //
 //         SERVO PINS:
@@ -59,6 +60,7 @@
 #define BACK_ENCODER_A         14
 #define BACK_ENCODER_B         15
 #define BACK_ENCODER_PULSES_PER_REV    600
+
 #define LEFT_WHEEL_ENCODER_A    16
 #define LEFT_WHEEL_ENCODER_B    17
 #define RIGHT_WHEEL_ENCODER_A   18

@@ -37,6 +37,7 @@ void customInitialization() {
     //      Used by motor and servo control (in very sketchy method ;c)
     TCCR2A = 0;
     TCCR2A |= (1 << COM2A1); // Enables PWM output for timer2 side A
+
     TCCR2A |= (1 << COM2B1); // Enables PWM output for timer2 side B
     TCCR2A |= (1 << WGM21) | (1 << WGM20); // Enables fast PWM Mode
 

@@ -29,6 +29,18 @@ int main() {
 //    Serial.begin(115200);
     IBus.begin(Serial);   // first instance - Uses compA of Timer0,
     servoDriverInit();
+    Serial.println("Start IBus2PWM");
+
+    customInitialization(); // Needed for initializing the timers.
+
+    DDRB |= _BV(PB5);
+    volatile uint64_t i = 0;
+
+    int saveServoVal = 0;
+    int saveMotorVal = 0;
+
+    int servoVal;
+    int motorVal;
 
     customInitialization(); // Needed for initializing the timers.
 
