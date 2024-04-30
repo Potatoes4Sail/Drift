@@ -43,6 +43,7 @@ encoders::encoders() {
               _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
               _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));
 
+    // Enables the internal pull-up resistor
     PORTC |= _BV(digitalPinToBitMask(BACK_ENCODER_A)) | _BV(digitalPinToBitMask(BACK_ENCODER_B)) |
              _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
              _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));
@@ -94,4 +95,12 @@ void encoders::calculateSpeeds() {
     rightEncoderSpeed = 1e6 * (rightEncoderPulseCount * WHEEL_ENCODER_PULSES_PER_REV) / deltaTime;
 
     lastTime = currentTime;
+}
+
+void encoders::printEncoderStatus(WheelEncoder whichEncoder) {
+    Serial.print("Encoder ");
+    Serial.print((WheelEncoder) whichEncoder);
+    Serial.print("'s speed is ");
+    Serial.print(getSpeed(whichEncoder));
+    Serial.print("\n");
 }

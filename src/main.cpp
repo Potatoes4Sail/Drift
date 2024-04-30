@@ -43,12 +43,20 @@ int main() {
     int motorVal;
 
     Serial.println("Start IBus2PWM");
+    unsigned long encoderPrintTime = 0;
     while (true) {
         _delay_ms(100);
 
+        // ================================================
+        //
+        //          READING IBUS INPUTS FROM RC.
+        //
+        // ================================================
         servoVal = IBus.readChannel(3); // get latest value for servo channel 4 (left horizontal)
         motorVal = IBus.readChannel(1); // get latest value for servo channel 2 (right vertical)
 
+
+        // Manual actuation of the car.
         if (saveServoVal != servoVal) {
             setAngle_us(servoVal);
             Serial.print("Servo: \t");
@@ -69,8 +77,22 @@ int main() {
             saveMotorVal = motorVal;
         }
 
+        // Printing of status of the encoders
+        if ((millis() - encoderPrintTime) > 500) {
+            encoderPrintTime = millis();
+
+            wheelEncoders.calculateSpeeds();
+            wheelEncoders.printEncoderStatus(BACK_ENCODER);
+            wheelEncoders.printEncoderStatus(LEFT_ENCODER);
+            wheelEncoders.printEncoderStatus(RIGHT_ENCODER);
+        }
+
         i++;
     }
+}
+
+void printEncoderStatus(int whichEncoder) {
+
 }
 
 ISR(ULTRASONIC_SENSORS_INT_vect) {
@@ -119,6 +141,5 @@ ISR(PCINT1_vect) {
     if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B))) {
         wheelEncoders.processInterrupt(RIGHT_ENCODER);
     }
-
 //    PORTB &= ~_BV(PB5);  // Used to time function with oscilloscope
 }

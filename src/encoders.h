@@ -24,6 +24,7 @@ public:
     void calculateSpeeds();
 
     double getSpeed(WheelEncoder whichEncoder);
+    void printEncoderStatus(WheelEncoder whichEncoder);
 
 private:
     uint16_t backEncoderPulseCount;
