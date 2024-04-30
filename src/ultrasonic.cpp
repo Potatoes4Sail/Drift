@@ -16,6 +16,8 @@ Ultrasonic::Ultrasonic(uint8_t trig, uint8_t leftEcho, uint8_t frontEcho, uint8_
     ULTRASONIC_SENSORS_PIN_MASK |=
             _BV(ULTRASONIC_SENSOR0_INT) | _BV(ULTRASONIC_SENSOR1_INT) | _BV(ULTRASONIC_SENSOR2_INT);
     PCICR |= _BV(ULTRASONIC_SENSORS_BANK);
+
+    startInterrupts();
 }
 
 void Ultrasonic::sendEcho() {

@@ -4,6 +4,7 @@
 
 #include <util/delay.h>
 #include <HardwareSerial.h>
+#include <wiring_private.h>
 #include "UltrasonicDriver.h"
 #include "helperFunctions.h"
 
@@ -43,13 +44,13 @@ int32_t UltrasonicDriver::readDistance() {
         Serial.println("ERROR, echo not detected ;c");
         return -1;
     }
-    Serial.print("distance to be read on pin");
-    Serial.print(echoPin);
-    Serial.print("\tCalculating distance; startTime is ");
-    Serial.print(startTime);
-    Serial.print("\t end time is ");
-    Serial.print(endTime);
-    Serial.print("\t :)\n");
+//    Serial.print("distance to be read on pin");
+//    Serial.print(echoPin);
+//    Serial.print("\tCalculating distance; startTime is ");
+//    Serial.print(startTime);
+//    Serial.print("\t end time is ");
+//    Serial.print(endTime);
+//    Serial.print("\t :)\n");
 
     uint16_t deltaTime = endTime - startTime;
     return deltaTime;
@@ -59,7 +60,6 @@ int32_t UltrasonicDriver::readDistance() {
 volatile bool UltrasonicDriver::handleInterrupt() {
     // Rising Edge
     if(!echoDetected && (*portInputRegister(digitalPinToPort(echoPin)) &= digitalPinToBitMask(echoPin))) {
-        //        TCNT1 = 0;    // Don't reset TCNT1, to allow for its use to time multiple things at once.
         startTime = TCNT1;
         echoDetected = true;
     } else if (echoDetected && !(*portInputRegister(digitalPinToPort(echoPin)) &= digitalPinToBitMask(echoPin))) {
@@ -67,7 +67,6 @@ volatile bool UltrasonicDriver::handleInterrupt() {
         echoDetected = false;
         return true;
     }
-
     return false;
 }
 

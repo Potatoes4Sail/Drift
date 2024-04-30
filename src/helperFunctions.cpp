@@ -49,6 +49,9 @@ void customInitialization() {
     TIMSK2 = _BV(TOIE2); // Enable the overflow interrupt
     sei();
 
+
+    PCICR |= _BV(PCIE0) | _BV(PCIE1);
+
     // Initalize pins:
     startInterrupts();
     // Empty for now ~

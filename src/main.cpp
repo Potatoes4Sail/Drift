@@ -30,6 +30,8 @@ void manualControlFunc();
 
 void launchControl();
 
+void printUltrasonic();
+
 void updateRemote();
 
 int motorVal = 0, servoVal = 0, autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel5 = 0, tractionControl = 0, channel9 = 0;
@@ -51,12 +53,23 @@ int main() {
     unsigned long encoderPrintTime = 0;
     bool manualControl = true;
 
+    unsigned long pingTime = millis();
+    unsigned long measureTime = millis();
     while (true) {
-
-        _delay_ms(100);
         updateRemote();
+        _delay_ms(1);
 
-        if (autonomousEnableChannel > 1500) { // Full self-driving:
+        if ((millis() - pingTime) > 100) {
+            ultrasonicSensors.sendEcho();
+            pingTime = millis();
+        }
+
+        if ((millis() - measureTime) > 1000) {
+            printUltrasonic();
+            measureTime = millis();
+        }
+
+        /*if (autonomousEnableChannel > 1500) { // Full self-driving:
             // Do autonomous stuff:
             Serial.println("Autonomous navigation...");
             // Do something with autonomousSpeedChannel;
@@ -68,13 +81,14 @@ int main() {
         } else if (tractionControl < 1250) {
             Serial.println("Something else ... breaking?");
         } else {
-            Serial.println("manual control");
+//            Serial.println("manual control");
             manualControlFunc();
-        }
+            printUltrasonic();
+        }*/
 
         // */
         // Printing of status of the encoders
-        if ((millis() - encoderPrintTime) > 100) {
+/*        if ((millis() - encoderPrintTime) > 100) {
             encoderPrintTime = millis();
 
             wheelEncoders.calculateSpeeds();
@@ -84,7 +98,9 @@ int main() {
             if (backSpeed > 0 && frontSpeed > 0) {
                 Serial.println(frontSpeed / backSpeed, 6);
             }
-        }
+        }*/
+
+
 
 
         i++;
@@ -92,7 +108,7 @@ int main() {
 }
 
 void updateRemote() {
-    // ================================================
+// ================================================
 //
 //          READING IBUS INPUTS FROM RC.
 //
@@ -112,6 +128,16 @@ void manualControlFunc() {// Manual actuation of the car.
     motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
 }
 
+void printUltrasonic() {
+    Serial.print("Left ");
+    Serial.print(ultrasonicSensors.readLeftDistance());
+    Serial.print("\t front ");
+    Serial.print(ultrasonicSensors.readFrontDistance());
+    Serial.print("\t right ");
+    Serial.print(ultrasonicSensors.readRightDistance());
+    Serial.print("\n");
+}
+
 //
 void launchControl() {
     stopAll();
@@ -123,6 +149,7 @@ void launchControl() {
             int motorSpeed = (autonomousSpeedChannel - 1500.0) * (127.0 / 500.0);
             wheelEncoders.calculateSpeeds();
             motor.setSpeed(motorSpeed);
+            setAngle_us(servoVal);
 
             float backSpeed = wheelEncoders.getSpeed(BACK_ENCODER);
             float frontSpeed = wheelEncoders.getSpeed(RIGHT_ENCODER);
