@@ -26,7 +26,13 @@ IBusBM IBus; // IBus object
 
 void stopAll();
 
-void manualControlFunc(int &oldServoVal, int &oldMotorVal, int servoVal, int motorVal);
+void manualControlFunc();
+
+void launchControl();
+
+void updateRemote();
+
+int motorVal = 0, servoVal = 0, autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel5 = 0, tractionControl = 0, channel9 = 0;
 
 int main() {
     init(); // Needed for arduino functionality
@@ -42,30 +48,13 @@ int main() {
     int oldServoVal = 0;
     int oldMotorVal = 0;
 
-    int servoVal;
-    int motorVal;
-
-    int autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel5 = 0, tractionControl = 0, channel9 = 0;
     unsigned long encoderPrintTime = 0;
     bool manualControl = true;
 
     while (true) {
 
         _delay_ms(100);
-
-        // ================================================
-        //
-        //          READING IBUS INPUTS FROM RC.
-        //
-        // ================================================
-        motorVal = IBus.readChannel(1);                    // get latest value for servo channel 2 (right vertical)
-        servoVal = IBus.readChannel(3);                    // get latest value for servo channel 4 (left horizontal)
-        autonomousSpeedChannel = IBus.readChannel(4);           // VRA - Adjust auto speed value?
-        channel5 = IBus.readChannel(5);                         // VRB - Unused
-        autonomousEnableChannel = IBus.readChannel(6);   // SWA - also disables all inputs - use for full autonomy
-        cruiseControlEnable = IBus.readChannel(7);
-        tractionControl = IBus.readChannel(8);                  //
-        channel9 = IBus.readChannel(9);
+        updateRemote();
 
         if (autonomousEnableChannel > 1500) { // Full self-driving:
             // Do autonomous stuff:
@@ -75,31 +64,12 @@ int main() {
             Serial.println("cruise navigation...");
         } else if (tractionControl > 1750) {
             Serial.println("traction control");
+            launchControl();
         } else if (tractionControl < 1250) {
             Serial.println("Something else ... breaking?");
         } else {
-//            manualControlFunc(oldServoVal, oldMotorVal, servoVal, motorVal);
             Serial.println("manual control");
-        }
-
-        if (oldServoVal != servoVal) {
-            setAngle_us(servoVal);
-//            Serial.print("Servo: \t");
-//            Serial.print(servoVal); // display new value in microseconds on PC
-//            Serial.print("\t - pulse: \t");
-//            Serial.print(getPulseSize());
-//            Serial.print("\n");
-            oldServoVal = servoVal;
-        }
-
-        if (oldMotorVal != motorVal) {
-            motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
-//            Serial.print("Motor: \t");
-//            Serial.print(motorVal); // display new value in microseconds on PC
-//            Serial.print("\t - pulse: \t");
-//            Serial.print((motorVal - 1500.0) * (127.0 / 500.0));
-//            Serial.print("\n");
-            oldMotorVal = motorVal;
+            manualControlFunc();
         }
 
         // */
@@ -121,25 +91,48 @@ int main() {
     }
 }
 
-void manualControlFunc(int &oldServoVal, int &oldMotorVal, int servoVal, int motorVal) {// Manual actuation of the car.
-    if (oldServoVal != servoVal) {
-        setAngle_us(servoVal);
-        Serial.print("Servo: \t");
-        Serial.print(servoVal); // display new value in microseconds on PC
-        Serial.print("\t - pulse: \t");
-        Serial.print(getPulseSize());
-        Serial.print("\n");
-        oldServoVal = servoVal;
-    }
+void updateRemote() {
+    // ================================================
+//
+//          READING IBUS INPUTS FROM RC.
+//
+// ================================================
+    motorVal = IBus.readChannel(1);                    // get latest value for servo channel 2 (right vertical)
+    servoVal = IBus.readChannel(3);                    // get latest value for servo channel 4 (left horizontal)
+    autonomousSpeedChannel = IBus.readChannel(4);           // VRA - Adjust auto speed value?
+    channel5 = IBus.readChannel(5);                         // VRB - Unused
+    autonomousEnableChannel = IBus.readChannel(6);   // SWA - also disables all inputs - use for full autonomy
+    cruiseControlEnable = IBus.readChannel(7);
+    tractionControl = IBus.readChannel(8);                  //
+    channel9 = IBus.readChannel(9);
+}
 
-    if (oldMotorVal != motorVal) {
-        motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
-        Serial.print("Motor: \t");
-        Serial.print(motorVal); // display new value in microseconds on PC
-        Serial.print("\t - pulse: \t");
-        Serial.print((motorVal - 1500.0) * (127.0 / 500.0));
-        Serial.print("\n");
-        oldMotorVal = motorVal;
+void manualControlFunc() {// Manual actuation of the car.
+    setAngle_us(servoVal);
+    motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
+}
+
+//
+void launchControl() {
+    stopAll();
+    // Check if SW10 is high, this will be used to launch.
+    if (channel9 > 1500) {
+        // Either one will break out of it.
+        while (channel9 > 1500 && tractionControl > 1750) {
+            updateRemote();
+            int motorSpeed = (autonomousSpeedChannel - 1500.0) * (127.0 / 500.0);
+            wheelEncoders.calculateSpeeds();
+            motor.setSpeed(motorSpeed);
+
+            float backSpeed = wheelEncoders.getSpeed(BACK_ENCODER);
+            float frontSpeed = wheelEncoders.getSpeed(RIGHT_ENCODER);
+            if (frontSpeed > 0 && backSpeed > 0) {
+                if (frontSpeed / backSpeed < 0.8) {
+                    motor.setSpeed(motorSpeed * .5);
+                }
+            }
+            _delay_ms(10);
+        }
     }
 }
 
