@@ -24,6 +24,10 @@ BST7960Driver motor(MOTOR_PIN_PWM_FORWARD, MOTOR_PIN_PWM_REVERSE, 15);
 
 IBusBM IBus; // IBus object
 
+void stopAll();
+
+void manualControlFunc(int &oldServoVal, int &oldMotorVal, int servoVal, int motorVal);
+
 int main() {
     init(); // Needed for arduino functionality
 //    Serial.begin(115200);
@@ -33,7 +37,8 @@ int main() {
 
     customInitialization(); // Needed for initializing the timers.
 
-    DDRB |= _BV(PB5);
+    Serial.println("Start IBus2PWM");
+
     volatile uint64_t i = 0;
 
     int saveServoVal = 0;
@@ -42,8 +47,9 @@ int main() {
     int servoVal;
     int motorVal;
 
-    Serial.println("Start IBus2PWM");
+    int autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel7 = 0, tractionControl = 0, channel9 = 0;
     unsigned long encoderPrintTime = 0;
+    bool manualControl = true;
     while (true) {
         _delay_ms(100);
 
@@ -52,29 +58,25 @@ int main() {
         //          READING IBUS INPUTS FROM RC.
         //
         // ================================================
-        servoVal = IBus.readChannel(3); // get latest value for servo channel 4 (left horizontal)
-        motorVal = IBus.readChannel(1); // get latest value for servo channel 2 (right vertical)
+        motorVal = IBus.readChannel(1);                         // get latest value for servo channel 2 (right vertical)
+        servoVal = IBus.readChannel(
+                3);                         // get latest value for servo channel 4 (left horizontal)
+        autonomousSpeedChannel = IBus.readChannel(4);           // VRA - Adjust auto speed value?
+        cruiseControlEnable = IBus.readChannel(5);                         // VRB - Unused
+        autonomousEnableChannel = IBus.readChannel(
+                6);          // SWA - also disables all inputs - use for full autonomy
+        channel7 = IBus.readChannel(7);
+        tractionControl = IBus.readChannel(8);                  //
+        channel9 = IBus.readChannel(9);
 
-
-        // Manual actuation of the car.
-        if (saveServoVal != servoVal) {
-            setAngle_us(servoVal);
-            Serial.print("Servo: \t");
-            Serial.print(servoVal); // display new value in microseconds on PC
-            Serial.print("\t - pulse: \t");
-            Serial.print(getPulseSize());
-            Serial.print("\n");
-            saveServoVal = servoVal;
-        }
-
-        if (saveMotorVal != motorVal) {
-            motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
-            Serial.print("Motor: \t");
-            Serial.print(motorVal); // display new value in microseconds on PC
-            Serial.print("\t - pulse: \t");
-            Serial.print((motorVal - 1500.0) * (127.0 / 500.0));
-            Serial.print("\n");
-            saveMotorVal = motorVal;
+        if (autonomousEnableChannel > 1500) { // Full self driving:
+            // Do autonomous stuff:
+            Serial.println("Autonomous navigation...");
+            // Do something with autonomousSpeedChannel;
+        } else if (cruiseControlEnable > 1500) {    // Just speed control only. Manual steering
+            Serial.println("cruise navigation...");
+        } else {
+            manualControlFunc(saveServoVal, saveMotorVal, servoVal, motorVal);
         }
 
         // Printing of status of the encoders
@@ -87,12 +89,36 @@ int main() {
             wheelEncoders.printEncoderStatus(RIGHT_ENCODER);
         }
 
+
         i++;
     }
 }
 
-void printEncoderStatus(int whichEncoder) {
+void manualControlFunc(int &oldServoVal, int &oldMotorVal, int servoVal, int motorVal) {// Manual actuation of the car.
+    if (oldServoVal != servoVal) {
+        setAngle_us(servoVal);
+        Serial.print("Servo: \t");
+        Serial.print(servoVal); // display new value in microseconds on PC
+        Serial.print("\t - pulse: \t");
+        Serial.print(getPulseSize());
+        Serial.print("\n");
+        oldServoVal = servoVal;
+    }
 
+    if (oldMotorVal != motorVal) {
+        motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
+        Serial.print("Motor: \t");
+        Serial.print(motorVal); // display new value in microseconds on PC
+        Serial.print("\t - pulse: \t");
+        Serial.print((motorVal - 1500.0) * (127.0 / 500.0));
+        Serial.print("\n");
+        oldMotorVal = motorVal;
+    }
+}
+
+void stopAll() {
+    motor.setSpeed(0);
+    setAngle_us(1500);
 }
 
 ISR(ULTRASONIC_SENSORS_INT_vect) {
