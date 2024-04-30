@@ -76,11 +76,11 @@ int BST7960Driver::setSpeed(int8_t speedVar) {
 
 // TODO: Allow for setting the alternative register to interrupt, and imporve resolution of servo.
 void BST7960Driver::setRegisterSpeed(uint8_t motor) {
-    Serial.print("function - speed = ");
-    Serial.print(speed);
-    Serial.print("\t and motor#\t");
-    Serial.print(motor);
-    Serial.print("\n");
+//    Serial.print("function - speed = ");
+//    Serial.print(speed);
+//    Serial.print("\t and motor#\t");
+//    Serial.print(motor);
+//    Serial.print("\n");
 
     TCCR2A &= ~0b11110000; // Turns off both of the outputs.
     // Set both comparator timers to 0. 
@@ -96,7 +96,7 @@ void BST7960Driver::setRegisterSpeed(uint8_t motor) {
         case 0:
             break;
         case FORWARD:
-            Serial.println("FORWARD!");
+//            Serial.println("FORWARD!");
             OCR2A = this->speed;
             TCCR2A |= _BV(COM2A1);
             break;

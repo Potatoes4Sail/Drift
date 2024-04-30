@@ -20,40 +20,68 @@ encoders::encoders() {
     //     Initialize the pins for the three encoder objects.
 
     // Sets encoder pin to input
-    *portModeRegister(digitalPinToPort(BACK_ENCODER_A)) &= ~digitalPinToBitMask(BACK_ENCODER_A);
+/*    *portModeRegister(digitalPinToPort(BACK_ENCODER_A)) &= ~digitalPinToBitMask(BACK_ENCODER_A);
     *portModeRegister(digitalPinToPort(BACK_ENCODER_B)) &= ~digitalPinToBitMask(BACK_ENCODER_B);
 
     *portModeRegister(digitalPinToPort(LEFT_WHEEL_ENCODER_A)) &= ~digitalPinToBitMask(LEFT_WHEEL_ENCODER_A);
     *portModeRegister(digitalPinToPort(LEFT_WHEEL_ENCODER_B)) &= ~digitalPinToBitMask(LEFT_WHEEL_ENCODER_B);
 
     *portModeRegister(digitalPinToPort(RIGHT_WHEEL_ENCODER_A)) &= ~digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A);
-    *portModeRegister(digitalPinToPort(RIGHT_WHEEL_ENCODER_B)) &= ~digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B);
+    *portModeRegister(digitalPinToPort(RIGHT_WHEEL_ENCODER_B)) &= ~digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B);*/
 
+    DDRC &= ~0b00111111; // Set to inputs
     // Configure the pin interrupts:
     uint8_t oldSREG = SREG;
     cli();
 
     PCICR |= _BV(PCIE1); // enable interrupts on bank C.
+    MCUCR &= ~_BV(PUD); // disable pull up disable.
 
+
+    PCICR |= _BV(PCIE1); // enable interrupts on bank C.
+
+    // Set up the bitmask
+    PCMSK1 |= _BV(0) | _BV(1);      // Rear encoder
+//    PCMSK1 |= _BV(2) | _BV(3);    // Left encoder (broken)
+    PCMSK1 |= _BV(4) | _BV(5);      // Right encoder
+
+    // Enable pull up
+//    PORTC |= _BV(2) | _BV(3); // Left encoder, which is broken.
+    PORTC |= _BV(4) | _BV(5);
+
+    MCUCR &= ~_BV(PUD); // disable pull up disable.
+
+    /*
 //    PCMSK1 |= _BV(digitalPinToBitMask(BACK_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) |
 //              _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A));
 
-    // Set up the bitmask
-    PCMSK1 |= _BV(digitalPinToBitMask(BACK_ENCODER_A)) | _BV(digitalPinToBitMask(BACK_ENCODER_B)) |
-              _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
-              _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));
+//    // Set up the bitmask
+//    PCMSK1 |= _BV(digitalPinToBitMask(BACK_ENCODER_A)) | _BV(digitalPinToBitMask(BACK_ENCODER_B)) |
+//              _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
+//              _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));
+//
+//    PORTC |= _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
+//            _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));
 
-    // Enables the internal pull-up resistor
-    PORTC |= _BV(digitalPinToBitMask(BACK_ENCODER_A)) | _BV(digitalPinToBitMask(BACK_ENCODER_B)) |
-             _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
-             _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));
+//    // Enables the internal pull-up resistor
+//    PORTC |= _BV(digitalPinToBitMask(BACK_ENCODER_A)) | _BV(digitalPinToBitMask(BACK_ENCODER_B)) |
+//             _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
+//             _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));*/
+
+
+/*    // Enables the internal pull-up resistor
+    PCMSK1 |= _BV(A0) | _BV(A1) | _BV(A2) | _BV(A3) | _BV(A4) | _BV(A5);
+    PORTC  |= _BV(A2) | _BV(A3) | _BV(A4) | _BV(A5);
+
+//    PCMSK1 |= _BV(A0) | _BV(A2) | _BV(A4);
+//    PORTC |= _BV(A2) | _BV(A4); // */ //ALL WRONG OOP.
 
 
     sei();
-    SREG = oldSREG;
+//    SREG = oldSREG;
 }
 
-void encoders::processInterrupt(WheelEncoder whichEncoder) {
+volatile void encoders::processInterrupt(WheelEncoder whichEncoder) {
     switch (whichEncoder) {
         case BACK_ENCODER:
             backEncoderPulseCount++;
@@ -83,17 +111,35 @@ double encoders::getSpeed(WheelEncoder whichEncoder) {
 
 // TODO: Validate the math behind this function. It's currently wrong (+create github issue for this)
 void encoders::calculateSpeeds() {
+//    Serial.print("Calculating speed... ");
     // Calculate the speed based on timeElasped/pulseCount
     uint32_t currentTime = micros();
     uint32_t deltaTime = currentTime - lastTime;
 
     if (deltaTime < MINIMUM_US) return; // Don't re-calculate speed if below this time.
 
-    // Calculate as rev/s
-    backEncoderSpeed = 1e6 * (backEncoderPulseCount * BACK_ENCODER_PULSES_PER_REV) / deltaTime;
-    leftEncoderSpeed = 1e6 * (leftEncoderPulseCount * WHEEL_ENCODER_PULSES_PER_REV) / deltaTime;
-    rightEncoderSpeed = 1e6 * (rightEncoderPulseCount * WHEEL_ENCODER_PULSES_PER_REV) / deltaTime;
+    float timeAmount = 1.0e6 / deltaTime;
+//    Serial.print("\t deltaTime = ");
+//    Serial.print(deltaTime);
+//    Serial.print("\t time amount is ");
+//    Serial.print(timeAmount,10);
+//    Serial.print(". \n");
 
+    // Calculate as rev/s
+    backEncoderSpeed = (timeAmount * backEncoderPulseCount) / (BACK_ENCODER_PULSES_PER_REV * 1.0);
+    leftEncoderSpeed = (timeAmount * leftEncoderPulseCount) / (WHEEL_ENCODER_PULSES_PER_REV * 1.0) * 3.777;
+    rightEncoderSpeed = (timeAmount * rightEncoderPulseCount) / (WHEEL_ENCODER_PULSES_PER_REV * 1.0) * 3.777;
+
+//    backEncoderSpeed = backEncoderPulseCount; //  * BACK_ENCODER_PULSES_PER_REV) / (deltaTime * 4 * 1e6);
+//    leftEncoderSpeed = leftEncoderPulseCount; // * WHEEL_ENCODER_PULSES_PER_REV) / (deltaTime * 4 * 1e6);
+//    rightEncoderSpeed = rightEncoderPulseCount; // * WHEEL_ENCODER_PULSES_PER_REV) / (deltaTime * 4 * 1e6);
+
+    // Zero counts.
+    backEncoderPulseCount = 0;
+    leftEncoderPulseCount = 0;
+    rightEncoderPulseCount = 0;
+
+    // Reset time
     lastTime = currentTime;
 }
 
@@ -101,6 +147,6 @@ void encoders::printEncoderStatus(WheelEncoder whichEncoder) {
     Serial.print("Encoder ");
     Serial.print((WheelEncoder) whichEncoder);
     Serial.print("'s speed is ");
-    Serial.print(getSpeed(whichEncoder));
+    Serial.print(getSpeed(whichEncoder) * 60, 6);
     Serial.print("\n");
 }

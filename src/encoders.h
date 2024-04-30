@@ -19,7 +19,7 @@ class encoders {
 public:
     encoders();
 
-    void processInterrupt(WheelEncoder whichEncoder);
+    volatile void processInterrupt(WheelEncoder whichEncoder);
 
     void calculateSpeeds();
 
@@ -27,9 +27,9 @@ public:
     void printEncoderStatus(WheelEncoder whichEncoder);
 
 private:
-    uint16_t backEncoderPulseCount;
-    uint16_t leftEncoderPulseCount;
-    uint16_t rightEncoderPulseCount;
+    volatile uint16_t backEncoderPulseCount;
+    volatile uint16_t leftEncoderPulseCount;
+    volatile uint16_t rightEncoderPulseCount;
 
     uint32_t lastTime;
 

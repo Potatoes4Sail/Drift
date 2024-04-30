@@ -33,16 +33,14 @@ int main() {
 //    Serial.begin(115200);
     IBus.begin(Serial);   // first instance - Uses compA of Timer0,
     servoDriverInit();
-    Serial.println("Start IBus2PWM");
-
     customInitialization(); // Needed for initializing the timers.
 
     Serial.println("Start IBus2PWM");
 
     volatile uint64_t i = 0;
 
-    int saveServoVal = 0;
-    int saveMotorVal = 0;
+    int oldServoVal = 0;
+    int oldMotorVal = 0;
 
     int servoVal;
     int motorVal;
@@ -50,7 +48,9 @@ int main() {
     int autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel7 = 0, tractionControl = 0, channel9 = 0;
     unsigned long encoderPrintTime = 0;
     bool manualControl = true;
+
     while (true) {
+
         _delay_ms(100);
 
         // ================================================
@@ -58,35 +58,60 @@ int main() {
         //          READING IBUS INPUTS FROM RC.
         //
         // ================================================
-        motorVal = IBus.readChannel(1);                         // get latest value for servo channel 2 (right vertical)
-        servoVal = IBus.readChannel(
-                3);                         // get latest value for servo channel 4 (left horizontal)
+        motorVal = IBus.readChannel(1);                    // get latest value for servo channel 2 (right vertical)
+        servoVal = IBus.readChannel(3);                    // get latest value for servo channel 4 (left horizontal)
         autonomousSpeedChannel = IBus.readChannel(4);           // VRA - Adjust auto speed value?
         cruiseControlEnable = IBus.readChannel(5);                         // VRB - Unused
-        autonomousEnableChannel = IBus.readChannel(
-                6);          // SWA - also disables all inputs - use for full autonomy
+        autonomousEnableChannel = IBus.readChannel(6);   // SWA - also disables all inputs - use for full autonomy
         channel7 = IBus.readChannel(7);
         tractionControl = IBus.readChannel(8);                  //
         channel9 = IBus.readChannel(9);
 
-        if (autonomousEnableChannel > 1500) { // Full self driving:
-            // Do autonomous stuff:
-            Serial.println("Autonomous navigation...");
-            // Do something with autonomousSpeedChannel;
-        } else if (cruiseControlEnable > 1500) {    // Just speed control only. Manual steering
-            Serial.println("cruise navigation...");
-        } else {
-            manualControlFunc(saveServoVal, saveMotorVal, servoVal, motorVal);
+//        if (autonomousEnableChannel > 1500) { // Full self-driving:
+//            // Do autonomous stuff:
+//            Serial.println("Autonomous navigation...");
+//            // Do something with autonomousSpeedChannel;
+//        } else if (cruiseControlEnable > 1500) {    // Just speed control only. Manual steering
+//            Serial.println("cruise navigation...");
+//        } else {
+//            manualControlFunc(saveServoVal, saveMotorVal, servoVal, motorVal);
+//        }
+
+        if (oldServoVal != servoVal) {
+            setAngle_us(servoVal);
+//            Serial.print("Servo: \t");
+//            Serial.print(servoVal); // display new value in microseconds on PC
+//            Serial.print("\t - pulse: \t");
+//            Serial.print(getPulseSize());
+//            Serial.print("\n");
+            oldServoVal = servoVal;
         }
 
+        if (oldMotorVal != motorVal) {
+            motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
+//            Serial.print("Motor: \t");
+//            Serial.print(motorVal); // display new value in microseconds on PC
+//            Serial.print("\t - pulse: \t");
+//            Serial.print((motorVal - 1500.0) * (127.0 / 500.0));
+//            Serial.print("\n");
+            oldMotorVal = motorVal;
+        }
+
+        // */
         // Printing of status of the encoders
-        if ((millis() - encoderPrintTime) > 500) {
+        if ((millis() - encoderPrintTime) > 100) {
             encoderPrintTime = millis();
 
             wheelEncoders.calculateSpeeds();
-            wheelEncoders.printEncoderStatus(BACK_ENCODER);
-            wheelEncoders.printEncoderStatus(LEFT_ENCODER);
-            wheelEncoders.printEncoderStatus(RIGHT_ENCODER);
+            float frontSpeed = wheelEncoders.getSpeed(RIGHT_ENCODER);
+            float backSpeed = wheelEncoders.getSpeed(BACK_ENCODER);
+
+            if (backSpeed > 0 && frontSpeed > 0) {
+                Serial.println(frontSpeed / backSpeed, 6);
+            }
+//            wheelEncoders.printEncoderStatus(BACK_ENCODER);
+//            wheelEncoders.printEncoderStatus(LEFT_ENCODER);
+//            wheelEncoders.printEncoderStatus(RIGHT_ENCODER);
         }
 
 
@@ -139,33 +164,45 @@ ISR(TIMER2_OVF_vect) {
     }
 }
 
-uint8_t oldInt = 0;
+volatile uint8_t oldInt = 0;
+volatile uint8_t newBits = 0;
+volatile uint8_t changedBits = 0;
 /**
  * ISR is used for pulse detection and counting, and will return speed.
  */
 ISR(PCINT1_vect) {
 //    PORTB |= _BV(PB5);  // Used to time function with oscilloscope
-    uint8_t changedBits = oldInt ^ PORTC;
+    newBits = PINC;
+    changedBits = oldInt ^ newBits;
+    oldInt = newBits;
 
-    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_A))) {
+//    Serial.print(oldInt);
+//    Serial.print("\t");
+//    Serial.print(newBits);
+//    Serial.print("\t");
+//    Serial.println(changedBits);
+
+    if (changedBits & _BV(0)) {
         wheelEncoders.processInterrupt(BACK_ENCODER);
     }
-    if (changedBits & _BV(digitalPinToBitMask(BACK_ENCODER_B))) {
+    if (changedBits & _BV(1)) {
         wheelEncoders.processInterrupt(BACK_ENCODER);
     }
 
-    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A))) {
-        wheelEncoders.processInterrupt(LEFT_ENCODER);
-    }
-    if (changedBits & _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B))) {
-        wheelEncoders.processInterrupt(LEFT_ENCODER);
-    }
+//    if (changedBits & _BV(2)) {
+//        wheelEncoders.processInterrupt(LEFT_ENCODER);
+//    }
+//    if (changedBits & _BV(3)) {
+//        wheelEncoders.processInterrupt(LEFT_ENCODER);
+//    }
 
-    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A))) {
+    if (changedBits & _BV(4)) {
         wheelEncoders.processInterrupt(RIGHT_ENCODER);
     }
-    if (changedBits & _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B))) {
+    if (changedBits & _BV(5)) {
         wheelEncoders.processInterrupt(RIGHT_ENCODER);
     }
 //    PORTB &= ~_BV(PB5);  // Used to time function with oscilloscope
+
+    // */
 }

@@ -59,7 +59,7 @@
 
 #define BACK_ENCODER_A         14
 #define BACK_ENCODER_B         15
-#define BACK_ENCODER_PULSES_PER_REV    600
+#define BACK_ENCODER_PULSES_PER_REV    261
 
 #define LEFT_WHEEL_ENCODER_A    16
 #define LEFT_WHEEL_ENCODER_B    17
