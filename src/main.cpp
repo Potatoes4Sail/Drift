@@ -45,7 +45,7 @@ int main() {
     int servoVal;
     int motorVal;
 
-    int autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel7 = 0, tractionControl = 0, channel9 = 0;
+    int autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel5 = 0, tractionControl = 0, channel9 = 0;
     unsigned long encoderPrintTime = 0;
     bool manualControl = true;
 
@@ -61,21 +61,26 @@ int main() {
         motorVal = IBus.readChannel(1);                    // get latest value for servo channel 2 (right vertical)
         servoVal = IBus.readChannel(3);                    // get latest value for servo channel 4 (left horizontal)
         autonomousSpeedChannel = IBus.readChannel(4);           // VRA - Adjust auto speed value?
-        cruiseControlEnable = IBus.readChannel(5);                         // VRB - Unused
+        channel5 = IBus.readChannel(5);                         // VRB - Unused
         autonomousEnableChannel = IBus.readChannel(6);   // SWA - also disables all inputs - use for full autonomy
-        channel7 = IBus.readChannel(7);
+        cruiseControlEnable = IBus.readChannel(7);
         tractionControl = IBus.readChannel(8);                  //
         channel9 = IBus.readChannel(9);
 
-//        if (autonomousEnableChannel > 1500) { // Full self-driving:
-//            // Do autonomous stuff:
-//            Serial.println("Autonomous navigation...");
-//            // Do something with autonomousSpeedChannel;
-//        } else if (cruiseControlEnable > 1500) {    // Just speed control only. Manual steering
-//            Serial.println("cruise navigation...");
-//        } else {
-//            manualControlFunc(saveServoVal, saveMotorVal, servoVal, motorVal);
-//        }
+        if (autonomousEnableChannel > 1500) { // Full self-driving:
+            // Do autonomous stuff:
+            Serial.println("Autonomous navigation...");
+            // Do something with autonomousSpeedChannel;
+        } else if (cruiseControlEnable > 1500) {    // Just speed control only. Manual steering
+            Serial.println("cruise navigation...");
+        } else if (tractionControl > 1750) {
+            Serial.println("traction control");
+        } else if (tractionControl < 1250) {
+            Serial.println("Something else ... breaking?");
+        } else {
+//            manualControlFunc(oldServoVal, oldMotorVal, servoVal, motorVal);
+            Serial.println("manual control");
+        }
 
         if (oldServoVal != servoVal) {
             setAngle_us(servoVal);
