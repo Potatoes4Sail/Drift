@@ -109,9 +109,6 @@ int main() {
             if (backSpeed > 0 && frontSpeed > 0) {
                 Serial.println(frontSpeed / backSpeed, 6);
             }
-//            wheelEncoders.printEncoderStatus(BACK_ENCODER);
-//            wheelEncoders.printEncoderStatus(LEFT_ENCODER);
-//            wheelEncoders.printEncoderStatus(RIGHT_ENCODER);
         }
 
 

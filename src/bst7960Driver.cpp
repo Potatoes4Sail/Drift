@@ -5,7 +5,6 @@
 #include <HardwareSerial.h>
 #include "bst7960Driver.h"
 
-
 /// Constructor for class which drives the L298 motor drivers.
 /// \n LIMITATIONS: Both pwm signals must come from the same timer, and TIMER0 is currently chosen.
 /// Does not validate if the two motors are on the two outputs of the timers
@@ -48,40 +47,10 @@ int BST7960Driver::setSpeed(int8_t speedVar) {
     setRegisterSpeed(direction);
     return 0;
 }
-//    // TODO: Would ideally set both pins at the same time to avoid different states,
-//    //  but this will impose significant restrictions on which pins can be used, and has a minor improvement
-//
-//    if (speed > deadband) { // Set throttle to positive
-//        setRegisterSpeed(FORWARD);  // Set PWM duty cycle to speed variable * 2
-///*        if (MOTOR_PWM_REGISTER == 0) {
-//            // Motor was previously off, set to full speed to start
-//            MOTOR_PWM_REGISTER = (uint8_t) 255;
-//        } else {
-//            MOTOR_PWM_REGISTER = (uint8_t) 2 * speed; // Set PWM duty cycle to speed variable * 2
-//        }*/
-//    } else if (speed < -deadband) { // Set throttle to negative
-//        setRegisterSpeed(REVERSE);  // Set PWM duty cycle to speed variable * 2
-//    } else { // Turn off throttle
-//        setRegisterSpeed(NONE);
-//        *portOutputRegister(digitalPinToPort(reversePWMPin)) &= ~digitalPinToBitMask(
-//                reversePWMPin); // Set reverse pin to low
-//        *portOutputRegister(digitalPinToPort(forwardPWMPin)) &= ~digitalPinToBitMask(
-//                forwardPWMPin); // Set forward pin to low
-//
-//        MOTOR_PWM_REGISTER = (uint8_t) 0; // Set PWM duty cycle to speed variable * 2
-//    }
-//    return 0;
-//}
 
 
 // TODO: Allow for setting the alternative register to interrupt, and imporve resolution of servo.
 void BST7960Driver::setRegisterSpeed(uint8_t motor) {
-//    Serial.print("function - speed = ");
-//    Serial.print(speed);
-//    Serial.print("\t and motor#\t");
-//    Serial.print(motor);
-//    Serial.print("\n");
-
     TCCR2A &= ~0b11110000; // Turns off both of the outputs.
     // Set both comparator timers to 0. 
     MOTOR_PWM_FORWARD_REGISTER = 0;

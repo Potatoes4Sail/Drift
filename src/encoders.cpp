@@ -51,32 +51,6 @@ encoders::encoders() {
 
     MCUCR &= ~_BV(PUD); // disable pull up disable.
 
-    /*
-//    PCMSK1 |= _BV(digitalPinToBitMask(BACK_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) |
-//              _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A));
-
-//    // Set up the bitmask
-//    PCMSK1 |= _BV(digitalPinToBitMask(BACK_ENCODER_A)) | _BV(digitalPinToBitMask(BACK_ENCODER_B)) |
-//              _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
-//              _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));
-//
-//    PORTC |= _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
-//            _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));
-
-//    // Enables the internal pull-up resistor
-//    PORTC |= _BV(digitalPinToBitMask(BACK_ENCODER_A)) | _BV(digitalPinToBitMask(BACK_ENCODER_B)) |
-//             _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(LEFT_WHEEL_ENCODER_B)) |
-//             _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_A)) | _BV(digitalPinToBitMask(RIGHT_WHEEL_ENCODER_B));*/
-
-
-/*    // Enables the internal pull-up resistor
-    PCMSK1 |= _BV(A0) | _BV(A1) | _BV(A2) | _BV(A3) | _BV(A4) | _BV(A5);
-    PORTC  |= _BV(A2) | _BV(A3) | _BV(A4) | _BV(A5);
-
-//    PCMSK1 |= _BV(A0) | _BV(A2) | _BV(A4);
-//    PORTC |= _BV(A2) | _BV(A4); // */ //ALL WRONG OOP.
-
-
     sei();
 //    SREG = oldSREG;
 }
@@ -111,7 +85,6 @@ double encoders::getSpeed(WheelEncoder whichEncoder) {
 
 // TODO: Validate the math behind this function. It's currently wrong (+create github issue for this)
 void encoders::calculateSpeeds() {
-//    Serial.print("Calculating speed... ");
     // Calculate the speed based on timeElasped/pulseCount
     uint32_t currentTime = micros();
     uint32_t deltaTime = currentTime - lastTime;
@@ -119,20 +92,11 @@ void encoders::calculateSpeeds() {
     if (deltaTime < MINIMUM_US) return; // Don't re-calculate speed if below this time.
 
     float timeAmount = 1.0e6 / deltaTime;
-//    Serial.print("\t deltaTime = ");
-//    Serial.print(deltaTime);
-//    Serial.print("\t time amount is ");
-//    Serial.print(timeAmount,10);
-//    Serial.print(". \n");
 
     // Calculate as rev/s
     backEncoderSpeed = (timeAmount * backEncoderPulseCount) / (BACK_ENCODER_PULSES_PER_REV * 1.0);
     leftEncoderSpeed = (timeAmount * leftEncoderPulseCount) / (WHEEL_ENCODER_PULSES_PER_REV * 1.0) * 3.777;
     rightEncoderSpeed = (timeAmount * rightEncoderPulseCount) / (WHEEL_ENCODER_PULSES_PER_REV * 1.0) * 3.777;
-
-//    backEncoderSpeed = backEncoderPulseCount; //  * BACK_ENCODER_PULSES_PER_REV) / (deltaTime * 4 * 1e6);
-//    leftEncoderSpeed = leftEncoderPulseCount; // * WHEEL_ENCODER_PULSES_PER_REV) / (deltaTime * 4 * 1e6);
-//    rightEncoderSpeed = rightEncoderPulseCount; // * WHEEL_ENCODER_PULSES_PER_REV) / (deltaTime * 4 * 1e6);
 
     // Zero counts.
     backEncoderPulseCount = 0;
