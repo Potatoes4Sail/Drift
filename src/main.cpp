@@ -30,9 +30,13 @@ void manualControlFunc();
 
 void launchControl();
 
+void autonomousDriving();
+
+void printUltrasonic();
+
 void updateRemote();
 
-int motorVal = 0, servoVal = 0, autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel5 = 0, tractionControl = 0, channel9 = 0;
+int motorVal = 0, servoVal = 0, autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel5 = 0, channel8 = 0, launchEnable = 0;
 
 int main() {
     init(); // Needed for arduino functionality
@@ -51,30 +55,40 @@ int main() {
     unsigned long encoderPrintTime = 0;
     bool manualControl = true;
 
+    unsigned long pingTime = millis();
+    unsigned long measureTime = millis();
     while (true) {
-
-        _delay_ms(100);
         updateRemote();
+        _delay_ms(1);
+
+        if ((millis() - pingTime) > 100) {
+            ultrasonicSensors.sendEcho();
+            pingTime = millis();
+        }
+
+        if ((millis() - measureTime) > 1000) {
+            printUltrasonic();
+            measureTime = millis();
+        }
 
         if (autonomousEnableChannel > 1500) { // Full self-driving:
             // Do autonomous stuff:
             Serial.println("Autonomous navigation...");
+            autonomousDriving();
             // Do something with autonomousSpeedChannel;
         } else if (cruiseControlEnable > 1500) {    // Just speed control only. Manual steering
             Serial.println("cruise navigation...");
-        } else if (tractionControl > 1750) {
-            Serial.println("traction control");
+        } else if (launchEnable > 1500) {
+            Serial.println("launch control");
             launchControl();
-        } else if (tractionControl < 1250) {
-            Serial.println("Something else ... breaking?");
         } else {
-            Serial.println("manual control");
             manualControlFunc();
+            printUltrasonic();
         }
 
         // */
         // Printing of status of the encoders
-        if ((millis() - encoderPrintTime) > 100) {
+/*        if ((millis() - encoderPrintTime) > 100) {
             encoderPrintTime = millis();
 
             wheelEncoders.calculateSpeeds();
@@ -84,7 +98,9 @@ int main() {
             if (backSpeed > 0 && frontSpeed > 0) {
                 Serial.println(frontSpeed / backSpeed, 6);
             }
-        }
+        }*/
+
+
 
 
         i++;
@@ -92,7 +108,7 @@ int main() {
 }
 
 void updateRemote() {
-    // ================================================
+// ================================================
 //
 //          READING IBUS INPUTS FROM RC.
 //
@@ -103,8 +119,8 @@ void updateRemote() {
     channel5 = IBus.readChannel(5);                         // VRB - Unused
     autonomousEnableChannel = IBus.readChannel(6);   // SWA - also disables all inputs - use for full autonomy
     cruiseControlEnable = IBus.readChannel(7);
-    tractionControl = IBus.readChannel(8);                  //
-    channel9 = IBus.readChannel(9);
+    channel8 = IBus.readChannel(8);                  //
+    launchEnable = IBus.readChannel(9);
 }
 
 void manualControlFunc() {// Manual actuation of the car.
@@ -112,27 +128,94 @@ void manualControlFunc() {// Manual actuation of the car.
     motor.setSpeed((motorVal - 1500.0) * (127.0 / 500.0));
 }
 
+void printUltrasonic() {
+    Serial.print("Left ");
+    Serial.print(ultrasonicSensors.readLeftDistance(), 5);
+    Serial.print("\t front ");
+    Serial.print(ultrasonicSensors.readFrontDistance(), 5);
+    Serial.print("\t right ");
+    Serial.print(ultrasonicSensors.readRightDistance(), 5);
+    Serial.print("\n");
+}
+
 //
-void launchControl() {
+void autonomousDriving() {
     stopAll();
     // Check if SW10 is high, this will be used to launch.
-    if (channel9 > 1500) {
-        // Either one will break out of it.
-        while (channel9 > 1500 && tractionControl > 1750) {
-            updateRemote();
-            int motorSpeed = (autonomousSpeedChannel - 1500.0) * (127.0 / 500.0);
-            wheelEncoders.calculateSpeeds();
-            motor.setSpeed(motorSpeed);
+    // Either one will break out of it.
+    unsigned long pingTime = 0;
+    unsigned long measureTime = 0;
 
-            float backSpeed = wheelEncoders.getSpeed(BACK_ENCODER);
-            float frontSpeed = wheelEncoders.getSpeed(RIGHT_ENCODER);
-            if (frontSpeed > 0 && backSpeed > 0) {
-                if (frontSpeed / backSpeed < 0.8) {
-                    motor.setSpeed(motorSpeed * .5);
-                }
-            }
-            _delay_ms(10);
+
+    float frontDistance = ultrasonicSensors.readFrontDistance();
+
+    while (autonomousEnableChannel > 1500) {
+        if ((millis() - pingTime) > 75) {
+            ultrasonicSensors.sendEcho();
+            pingTime = millis();
         }
+
+        if ((millis() - measureTime) > 250) {
+            frontDistance = ultrasonicSensors.readFrontDistance();
+            measureTime = millis();
+        }
+
+        updateRemote();
+        int motorSpeed = -((autonomousSpeedChannel - 1500.0) * (127.0 / 500.0));
+        // Desired speed
+
+        wheelEncoders.calculateSpeeds();
+        float frontLimit = 1000;
+
+        motor.setSpeed(motorSpeed);
+        setAngle_us(servoVal);
+
+        float backSpeed = wheelEncoders.getSpeed(BACK_ENCODER);
+        float frontSpeed = wheelEncoders.getSpeed(RIGHT_ENCODER);
+        if (frontSpeed > 0 && backSpeed > 0) {
+            if (frontSpeed / backSpeed < 0.8) {
+                motorSpeed = motorSpeed * 0.5;
+            }
+        }
+
+        if (frontDistance < 5000) {
+            Serial.print("frontDistance = ");
+            Serial.print(frontDistance);
+            Serial.print("\t speed scaling = ");
+            float speedScaler = 1.0 + ((frontDistance - frontLimit) - (5000 - frontLimit)) /
+                                      ((5000 - frontLimit)); // 4k - idk. 2k if at 3k. (Half speed).
+            motorSpeed = motorSpeed * speedScaler;
+            Serial.println(speedScaler);
+        }
+
+//        if (frontDistance < 2000) {
+//            motorSpeed = 0;
+//        }
+
+        motor.setSpeed(motorSpeed);
+        _delay_ms(100);
+    }
+}
+
+
+void launchControl() {
+    stopAll();
+
+    while (launchEnable > 1500) {
+        updateRemote();
+        int motorSpeed = -((autonomousSpeedChannel - 1500.0) * (127.0 / 500.0));
+        wheelEncoders.calculateSpeeds();
+        motor.setSpeed(motorSpeed);
+        setAngle_us(servoVal);
+
+        float backSpeed = wheelEncoders.getSpeed(BACK_ENCODER);
+        float frontSpeed = wheelEncoders.getSpeed(RIGHT_ENCODER);
+        if (frontSpeed > 0 && backSpeed > 0) {
+            if (frontSpeed / backSpeed < 0.8) {
+                motor.setSpeed(motorSpeed * .5);
+            }
+        }
+        _delay_ms(10);
     }
 }
 
