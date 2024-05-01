@@ -14,7 +14,7 @@ enum WheelEncoder {
     RIGHT_ENCODER   // 2
 };
 
-#define MINIMUM_US 50000
+#define MINIMUM_US 10000
 class encoders {
 public:
     encoders();

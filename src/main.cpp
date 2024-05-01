@@ -20,7 +20,7 @@ Ultrasonic ultrasonicSensors = Ultrasonic(ULTRASONIC_SENSOR_TRIGGER_PIN,
 encoders wheelEncoders = encoders();
 
 L298Driver oldMotor(3, 4, 2, 15);
-BST7960Driver motor(MOTOR_PIN_PWM_FORWARD, MOTOR_PIN_PWM_REVERSE, 15);
+BST7960Driver motor(MOTOR_PIN_PWM_FORWARD, MOTOR_PIN_PWM_REVERSE, 5);
 
 IBusBM IBus; // IBus object
 
@@ -31,6 +31,8 @@ void manualControlFunc();
 void launchControl();
 
 void autonomousDriving();
+
+int PIDControl();
 
 void printUltrasonic();
 
@@ -61,7 +63,7 @@ int main() {
         updateRemote();
         _delay_ms(1);
 
-        if ((millis() - pingTime) > 100) {
+/*        if ((millis() - pingTime) > 100) {
             ultrasonicSensors.sendEcho();
             pingTime = millis();
         }
@@ -69,21 +71,22 @@ int main() {
         if ((millis() - measureTime) > 1000) {
             printUltrasonic();
             measureTime = millis();
-        }
+        }*/
 
         if (autonomousEnableChannel > 1500) { // Full self-driving:
             // Do autonomous stuff:
-            Serial.println("Autonomous navigation...");
+//            Serial.println("Autonomous navigation...");
             autonomousDriving();
             // Do something with autonomousSpeedChannel;
         } else if (cruiseControlEnable > 1500) {    // Just speed control only. Manual steering
-            Serial.println("cruise navigation...");
+//            Serial.println("cruise navigation...");
+            PIDControl();
         } else if (launchEnable > 1500) {
-            Serial.println("launch control");
+//            Serial.println("launch control");
             launchControl();
         } else {
             manualControlFunc();
-            printUltrasonic();
+//            printUltrasonic();
         }
 
         // */
@@ -150,15 +153,15 @@ void autonomousDriving() {
     float frontDistance = ultrasonicSensors.readFrontDistance();
 
     while (autonomousEnableChannel > 1500) {
-        if ((millis() - pingTime) > 75) {
-            ultrasonicSensors.sendEcho();
-            pingTime = millis();
-        }
-
-        if ((millis() - measureTime) > 250) {
-            frontDistance = ultrasonicSensors.readFrontDistance();
-            measureTime = millis();
-        }
+//        if ((millis() - pingTime) > 75) {
+//            ultrasonicSensors.sendEcho();
+//            pingTime = millis();
+//        }
+//
+//        if ((millis() - measureTime) > 250) {
+//            frontDistance = ultrasonicSensors.readFrontDistance();
+//            measureTime = millis();
+//        }
 
         updateRemote();
         int motorSpeed = -((autonomousSpeedChannel - 1500.0) * (127.0 / 500.0));
@@ -215,6 +218,82 @@ void launchControl() {
                 motor.setSpeed(motorSpeed * .5);
             }
         }
+        _delay_ms(10);
+    }
+}
+
+
+#define KP 10.0f
+#define KI 96.0f
+#define KD 0.09375f
+
+//#define KI 800.0f
+//#define KD 0.28125f
+int PIDControl() {
+
+    stopAll();
+
+    // PID Controller
+    float integral = 0;
+    float lastError = 0;
+    unsigned long lastTime = micros();
+
+    while (cruiseControlEnable > 1500) {
+
+        updateRemote();
+        wheelEncoders.calculateSpeeds();
+        setAngle_us(servoVal);
+        uint8_t actualSpeed = 2 * abs(-((autonomousSpeedChannel - 1500.0) * (127.0 / 500.0)));
+
+        unsigned long now = micros();
+        double dt = (now - lastTime) / 1000000.0;
+        if (dt == 0) continue;
+
+        // MEASURE SPEED AND COMPUTE ERROR
+        float measuredSpeed = wheelEncoders.getSpeed(RIGHT_ENCODER);
+        float error = actualSpeed - measuredSpeed;
+        // We should do the difference in expected angular velocity and measured in RPM
+
+        // Calculate PID
+        integral += error * dt;
+        float derivative = error - lastError;
+        float output = (KP * error) + (KI * integral) + (KD * derivative);
+
+        lastError = error;
+        lastTime = now;
+
+        // Saturate
+        if (output < 0) output = 0;
+        else if (output > 255) output = 255;
+        output = output / 2;
+        motor.setSpeed(output);
+/*        Serial.print("input = ");
+        Serial.print(actualSpeed);
+        Serial.print("\t measured = ");
+        Serial.print(measuredSpeed);
+        Serial.print("\t error = ");
+        Serial.print(error);
+        Serial.print("\t integral = ");
+        Serial.print(integral);
+        Serial.print("\t derivative = ");
+        Serial.print(derivative);
+        Serial.print("\t output = ");
+        Serial.print(output);
+        Serial.print("\n");*/
+        Serial.print(dt, 5);
+        Serial.print("\t");
+        Serial.print(actualSpeed);
+        Serial.print("\t");
+        Serial.print(measuredSpeed);
+        Serial.print("\t");
+        Serial.print(error);
+        Serial.print("\t");
+        Serial.print(integral);
+        Serial.print("\t");
+        Serial.print(derivative);
+        Serial.print("\t");
+        Serial.print(output);
+        Serial.print("\n");
         _delay_ms(10);
     }
 }

@@ -6,9 +6,6 @@
 #include <Arduino.h>
 #include "bst7960Driver.h"
 
-#define KP 50.0f
-#define KI 20.0f
-#define KD 3.0f
 BST7960Driver::BST7960Driver(uint8_t forwardPWMPin, uint8_t reversePWMPin, uint8_t deadbandVal) {
 
     // Sets variables of the class.
