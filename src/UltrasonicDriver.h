@@ -17,7 +17,8 @@ public:
 
     /// pollSensor - Sends a pulse from the sensor
     int8_t pollSensor();
-    int32_t readDistance();
+
+    float readDistance();
     volatile bool handleInterrupt();
 
 private:

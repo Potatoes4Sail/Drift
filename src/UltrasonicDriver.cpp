@@ -38,7 +38,7 @@ void UltrasonicDriver::triggerUltrasound() const {
     *portOutputRegister(digitalPinToPort(triggerPin)) &= ~digitalPinToBitMask(triggerPin);  // Turns off pin again
 }
 
-int32_t UltrasonicDriver::readDistance() {
+float UltrasonicDriver::readDistance() {
     Serial.print(echoDetected);
     if (echoDetected) {     // TODO: Investigate this, there seems to be a a bug if only pin8 is connected with pin10
         Serial.println("ERROR, echo not detected ;c");
@@ -53,7 +53,8 @@ int32_t UltrasonicDriver::readDistance() {
 //    Serial.print("\t :)\n");
 
     uint16_t deltaTime = endTime - startTime;
-    return deltaTime;
+    return (deltaTime * 0.1077270507f); // TCNT1
+//    return (deltaTime * 0.1715f); // micros()
     //    return (uint16_t)(deltaTime / (4 * 5.88235f));
 }
 
