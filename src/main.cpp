@@ -38,7 +38,25 @@ void printUltrasonic();
 
 void updateRemote();
 
-int motorVal = 0, servoVal = 0, autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, channel5 = 0, channel8 = 0, launchEnable = 0;
+int motorVal = 0, servoVal = 0, autonomousSpeedChannel = 0, cruiseControlEnable = 0, autonomousEnableChannel = 0, steeringTrim = 0, channel8 = 0, launchEnable = 0;
+
+void ultrasonicTesting() {
+    uint32_t pulseTime = millis();
+    uint32_t printTime = millis();
+    while (true) {
+        if (millis() - pulseTime > 75) {
+            pulseTime = millis();
+            ultrasonicSensors.sendEcho();
+        }
+
+        if (millis() - printTime > 300) {
+            printTime = millis();
+            Serial.println(ultrasonicSensors.readFrontDistance());
+//            printUltrasonic();
+        }
+        _delay_ms(10);
+    }
+}
 
 int main() {
     init(); // Needed for arduino functionality
@@ -51,17 +69,15 @@ int main() {
 
     volatile uint64_t i = 0;
 
-    int oldServoVal = 0;
-    int oldMotorVal = 0;
-
     unsigned long encoderPrintTime = 0;
-    bool manualControl = true;
 
-    unsigned long pingTime = millis();
-    unsigned long measureTime = millis();
+    /*unsigned long pingTime = millis();
+    unsigned long measureTime = millis();*/
     while (true) {
+//        ultrasonicTesting();
+
         updateRemote();
-        _delay_ms(1);
+        _delay_ms(5);
 
 /*        if ((millis() - pingTime) > 100) {
             ultrasonicSensors.sendEcho();
@@ -111,19 +127,21 @@ int main() {
 }
 
 void updateRemote() {
-// ================================================
-//
-//          READING IBUS INPUTS FROM RC.
-//
-// ================================================
-    motorVal = IBus.readChannel(1);                    // get latest value for servo channel 2 (right vertical)
-    servoVal = IBus.readChannel(3);                    // get latest value for servo channel 4 (left horizontal)
-    autonomousSpeedChannel = IBus.readChannel(4);           // VRA - Adjust auto speed value?
-    channel5 = IBus.readChannel(5);                         // VRB - Unused
-    autonomousEnableChannel = IBus.readChannel(6);   // SWA - also disables all inputs - use for full autonomy
-    cruiseControlEnable = IBus.readChannel(7);
-    channel8 = IBus.readChannel(8);                  //
-    launchEnable = IBus.readChannel(9);
+    // ================================================
+    //
+    //          READING IBUS INPUTS FROM RC.
+    //
+    // ================================================
+    motorVal = IBus.readChannel(1);                 // get latest value for servo channel 2 (right vertical)
+    servoVal = IBus.readChannel(3);                 // get latest value for servo channel 4 (left horizontal)
+    autonomousSpeedChannel = IBus.readChannel(4);   // VRA - Adjust auto speed value
+    steeringTrim = IBus.readChannel(5);             // VRB - Trim steering to be straight?
+    autonomousEnableChannel = IBus.readChannel(6);  // SWA - also disables all inputs - use for full autonomy
+    cruiseControlEnable = IBus.readChannel(7);      //
+    channel8 = IBus.readChannel(8);                 //
+    launchEnable = IBus.readChannel(9);             //
+
+    servoVal = servoVal + (steeringTrim - 1500);    // Allows for adjustment to steering to have car run true
 }
 
 void manualControlFunc() {// Manual actuation of the car.
@@ -150,29 +168,39 @@ void autonomousDriving() {
     unsigned long measureTime = 0;
 
 
+    float leftDistance = ultrasonicSensors.readLeftDistance();
     float frontDistance = ultrasonicSensors.readFrontDistance();
+    float rightDistance = ultrasonicSensors.readRightDistance();
+
+    float frontLimitStart = 2500;
+    float frontLimit = 500;
+
 
     while (autonomousEnableChannel > 1500) {
-//        if ((millis() - pingTime) > 75) {
-//            ultrasonicSensors.sendEcho();
-//            pingTime = millis();
-//        }
-//
-//        if ((millis() - measureTime) > 250) {
-//            frontDistance = ultrasonicSensors.readFrontDistance();
-//            measureTime = millis();
-//        }
+        if ((millis() - pingTime) > 75) {
+            ultrasonicSensors.sendEcho();
+            pingTime = millis();
+        }
+
+        if ((millis() - measureTime) > 100) {
+            leftDistance = ultrasonicSensors.readLeftDistance();
+            frontDistance = ultrasonicSensors.readFrontDistance();
+            rightDistance = ultrasonicSensors.readRightDistance();
+            measureTime = millis();
+        }
 
         updateRemote();
+
+
         int motorSpeed = -((autonomousSpeedChannel - 1500.0) * (127.0 / 500.0));
         // Desired speed
 
         wheelEncoders.calculateSpeeds();
-        float frontLimit = 1000;
 
         motor.setSpeed(motorSpeed);
         setAngle_us(servoVal);
 
+/*
         float backSpeed = wheelEncoders.getSpeed(BACK_ENCODER);
         float frontSpeed = wheelEncoders.getSpeed(RIGHT_ENCODER);
         if (frontSpeed > 0 && backSpeed > 0) {
@@ -180,13 +208,14 @@ void autonomousDriving() {
                 motorSpeed = motorSpeed * 0.5;
             }
         }
+*/
 
-        if (frontDistance < 5000) {
+        if (frontDistance < frontLimitStart) {
             Serial.print("frontDistance = ");
             Serial.print(frontDistance);
             Serial.print("\t speed scaling = ");
-            float speedScaler = 1.0 + ((frontDistance - frontLimit) - (5000 - frontLimit)) /
-                                      ((5000 - frontLimit)); // 4k - idk. 2k if at 3k. (Half speed).
+            float speedScaler = 1.0f + ((frontDistance - frontLimit) - (frontLimitStart - frontLimit)) /
+                                       ((frontLimitStart - frontLimit)); // 4k - idk. 2k if at 3k. (Half speed).
             motorSpeed = motorSpeed * speedScaler;
             Serial.println(speedScaler);
         }
@@ -196,6 +225,7 @@ void autonomousDriving() {
 //        }
 
         motor.setSpeed(motorSpeed);
+        setAngle_us(servoVal);
         _delay_ms(100);
     }
 }
@@ -237,6 +267,7 @@ int PIDControl() {
     float integral = 0;
     float lastError = 0;
     unsigned long lastTime = micros();
+//    uint16_t lastTime = TCNT1;
 
     while (cruiseControlEnable > 1500) {
 
@@ -246,7 +277,7 @@ int PIDControl() {
         uint8_t actualSpeed = 2 * abs(-((autonomousSpeedChannel - 1500.0) * (127.0 / 500.0)));
 
         unsigned long now = micros();
-        double dt = (now - lastTime) / 1000000.0;
+        float dt = (lastTime - now) / 1000000.0f;
         if (dt == 0) continue;
 
         // MEASURE SPEED AND COMPUTE ERROR
@@ -267,6 +298,7 @@ int PIDControl() {
         else if (output > 255) output = 255;
         output = output / 2;
         motor.setSpeed(output);
+
 /*        Serial.print("input = ");
         Serial.print(actualSpeed);
         Serial.print("\t measured = ");
@@ -280,6 +312,7 @@ int PIDControl() {
         Serial.print("\t output = ");
         Serial.print(output);
         Serial.print("\n");*/
+
         Serial.print(dt, 5);
         Serial.print("\t");
         Serial.print(actualSpeed);

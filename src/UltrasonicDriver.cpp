@@ -26,6 +26,7 @@ UltrasonicDriver::UltrasonicDriver(uint8_t triggerPinIN, uint8_t echoPinIN) {
 int8_t UltrasonicDriver::pollSensor() {
     if (!initialized) return -1;
     triggerUltrasound();
+    echoDetected = false;
     return 0;
 }
 
@@ -44,6 +45,8 @@ float UltrasonicDriver::readDistance() {
         Serial.println("ERROR, echo not detected ;c");
         return -1;
     }
+
+//    Serial.print("\n");
 //    Serial.print("distance to be read on pin");
 //    Serial.print(echoPin);
 //    Serial.print("\tCalculating distance; startTime is ");
@@ -52,7 +55,13 @@ float UltrasonicDriver::readDistance() {
 //    Serial.print(endTime);
 //    Serial.print("\t :)\n");
 
+    // To calculate distance based on TCNT1:
+    // (F_cpu)  *   (PRESCALER) *   (speed of sound/2)
+    // (1/16)   *   (64)        *   (0.343/2)
+    // 0.686
     uint16_t deltaTime = endTime - startTime;
+    return deltaTime * 2.710211509f;   // Returns distance in mm
+
     return (deltaTime * 0.1077270507f); // TCNT1
 //    return (deltaTime * 0.1715f); // micros()
     //    return (uint16_t)(deltaTime / (4 * 5.88235f));

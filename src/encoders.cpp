@@ -86,12 +86,12 @@ double encoders::getSpeed(WheelEncoder whichEncoder) {
 // TODO: Validate the math behind this function. It's currently wrong (+create github issue for this)
 void encoders::calculateSpeeds() {
     // Calculate the speed based on timeElasped/pulseCount
-    uint32_t currentTime = micros();
-    uint32_t deltaTime = currentTime - lastTime;
+    uint16_t currentTime = micros();
+    uint16_t deltaTime = currentTime - lastTime;
 
-    if (deltaTime < MINIMUM_US) return; // Don't re-calculate speed if below this time.
+    if ((currentTime) < MINIMUM_US) return; // Don't re-calculate speed if below this time.
 
-    float timeAmount = 1.0e6 / deltaTime;
+    float timeAmount = 1.0e6f / deltaTime;
 
     // Calculate as rev/s
     backEncoderSpeed = (timeAmount * backEncoderPulseCount) / (BACK_ENCODER_PULSES_PER_REV * 1.0);

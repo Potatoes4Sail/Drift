@@ -1,7 +1,7 @@
 # Project description
 
 TODO: Write an actual description
-[printer.cfg](..%2F..%2F..%2F..%2FDocuments%2FTrident%2FInitial%20Configs%2F2024-04-28%2Fprinter_data%2Fconfig%2Fprinter.cfg)
+
 # Pin Allocation
 
 ![Nano Pins.jpeg](documentation%2FNano%20Pins.jpeg)

@@ -28,7 +28,8 @@ void customInitialization() {
 
     // Timer1 (used for timing by ultrasonic sensors, pulse encoders, and ...?)
     TCCR1A = 0x00;          // Sets timer/counter1 control register back to default state.
-    TCCR1B = 0b001;         // Sets /1024 prescaler
+//    TCCR1B = 0b011;         // Sets /64 prescaler (max time of 0.262 seconds with an accuracy of +- 4 us)
+    TCCR1B = 0b100;         // Sets /256 prescaler (max time of ~1 seconds with an accuracy of +- 16 us)
     TCNT1 = 0; // clear timer values
     TIMSK1 = 0;
     _BV(TOIE1);
