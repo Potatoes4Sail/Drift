@@ -159,7 +159,7 @@ void printUltrasonic() {
     Serial.print("\n");
 }
 
-//
+
 void autonomousDriving() {
     stopAll();
     // Check if SW10 is high, this will be used to launch.
