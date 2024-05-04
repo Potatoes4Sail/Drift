@@ -9,6 +9,8 @@
 #include "L298Driver.h"
 #include "servoDriver.h"
 
+
+/*
 /// Temporary function which runs various speed commands to see if the motor is behaving properly.
 /// Motor will run in forward direction, and then coast down, speed up and then brake
 void motorTestSpinUnidirectional() {
@@ -43,6 +45,8 @@ void motorTestSpinBidirectional() {
     motor.setSpeed(0);
     _delay_ms(2000);
 }
+
+//*/
 
 void servoSweepAngles() {
     servoDriverInit();

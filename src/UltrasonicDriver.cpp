@@ -4,6 +4,7 @@
 
 #include <util/delay.h>
 #include <HardwareSerial.h>
+#include <wiring_private.h>
 #include "UltrasonicDriver.h"
 #include "helperFunctions.h"
 
@@ -25,6 +26,7 @@ UltrasonicDriver::UltrasonicDriver(uint8_t triggerPinIN, uint8_t echoPinIN) {
 int8_t UltrasonicDriver::pollSensor() {
     if (!initialized) return -1;
     triggerUltrasound();
+    echoDetected = false;
     return 0;
 }
 
@@ -37,29 +39,37 @@ void UltrasonicDriver::triggerUltrasound() const {
     *portOutputRegister(digitalPinToPort(triggerPin)) &= ~digitalPinToBitMask(triggerPin);  // Turns off pin again
 }
 
-int32_t UltrasonicDriver::readDistance() {
+float UltrasonicDriver::readDistance() {
     Serial.print(echoDetected);
     if (echoDetected) {     // TODO: Investigate this, there seems to be a a bug if only pin8 is connected with pin10
         Serial.println("ERROR, echo not detected ;c");
         return -1;
     }
-    Serial.print("distance to be read on pin");
-    Serial.print(echoPin);
-    Serial.print("\tCalculating distance; startTime is ");
-    Serial.print(startTime);
-    Serial.print("\t end time is ");
-    Serial.print(endTime);
-    Serial.print("\t :)\n");
 
+//    Serial.print("\n");
+//    Serial.print("distance to be read on pin");
+//    Serial.print(echoPin);
+//    Serial.print("\tCalculating distance; startTime is ");
+//    Serial.print(startTime);
+//    Serial.print("\t end time is ");
+//    Serial.print(endTime);
+//    Serial.print("\t :)\n");
+
+    // To calculate distance based on TCNT1:
+    // (F_cpu)  *   (PRESCALER) *   (speed of sound/2)
+    // (1/16)   *   (64)        *   (0.343/2)
+    // 0.686
     uint16_t deltaTime = endTime - startTime;
-    return deltaTime;
+    return deltaTime * 2.710211509f;   // Returns distance in mm
+
+    return (deltaTime * 0.1077270507f); // TCNT1
+//    return (deltaTime * 0.1715f); // micros()
     //    return (uint16_t)(deltaTime / (4 * 5.88235f));
 }
 
 volatile bool UltrasonicDriver::handleInterrupt() {
     // Rising Edge
     if(!echoDetected && (*portInputRegister(digitalPinToPort(echoPin)) &= digitalPinToBitMask(echoPin))) {
-        //        TCNT1 = 0;    // Don't reset TCNT1, to allow for its use to time multiple things at once.
         startTime = TCNT1;
         echoDetected = true;
     } else if (echoDetected && !(*portInputRegister(digitalPinToPort(echoPin)) &= digitalPinToBitMask(echoPin))) {
@@ -67,7 +77,6 @@ volatile bool UltrasonicDriver::handleInterrupt() {
         echoDetected = false;
         return true;
     }
-
     return false;
 }
 

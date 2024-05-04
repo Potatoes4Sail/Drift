@@ -8,7 +8,9 @@ TODO: Write an actual description
 
 | Pin# | D Pin | Bank | Use                    | Priority |
 |------|-------|------|------------------------|----------|
+| 30   | RX0   | PD0  | IBus reciever          | High     |
 | 1    | D3    | PD3  | Motor PWM 1            | High     |
+| 15   | D11   | PB3  | Motor PWM 2            | High     |
 | 2    | D4    | PD4  | Motor Forward Dir      | Low      |
 | 32   | D2    | PD2  | Motor Reverse Dir      | Low      |
 | 9    | D5    | PD5  | Servo Control 1        | High     |
@@ -23,8 +25,6 @@ TODO: Write an actual description
 | 27   | D18   | PC4  | Right Wheel Encoder A  | Medium   |
 | 28   | D19   | PC5  | Right Wheel Encoder B  | Medium   |
 
-[//]: # (| 10   | D6    | PD6  | Servo Control 2        | High     |)
-
 # Timer allocation:
 
 Timer0 - Left for Arduino functions (micros & millis)
@@ -32,6 +32,8 @@ Timer1 - Use for timing durations of echo pulses
 Timer2 - Used for motor & servo PWM control.
 
 ## Communication Protocols
+
+IBus was used for remote communication.
 
 ## Sensors
 
@@ -43,16 +45,12 @@ interrupts.
 Echo pins are set on B bank of IO pins. All the pins will need to be on this bank to be able to use the interrupt
 features
 
-### IMU
-
 ## Actuators
 
 ### H-Bridge
 
-**TODO:** Add method to 'kick start' the motor, at low RPM motor does not startup properly, need way to be able to do
-this
-
-H-Bridge functionality added, with the ability to change the speed of a motor.
+H-Bridge functionality added, with the ability to change the speed and direction of a motor. This was implemented twice
+as the first H-Bridge used was not capable of running the motor selected continiously.
 
 #### PWM Control
 
